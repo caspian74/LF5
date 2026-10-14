@@ -6,6 +6,7 @@
   var st = A.st;
 
   var NAV = [['resumen', 'Resumen', 'home'], ['clientes', 'Clientes', 'users'], ['leads', 'Leads', 'inbox'], ['pedidos', 'Pedidos', 'card'], ['tickets', 'Tickets', 'help'], ['usuarios', 'Usuarios', 'user'], ['sitio', 'Sitio', 'globe'], ['herramientas', 'Herramientas', 'tool'], ['ajustes', 'Ajustes', 'gear']];
+  A.NAV = NAV;
   var LEAD_ST = ['nuevo', 'contactado', 'diagnostico', 'propuesta', 'ganado', 'perdido'];
   A.LEAD_ST = LEAD_ST;
 
@@ -50,7 +51,7 @@
       st.leads = r.data.leads; var q = (st.leadQ || '').toLowerCase();
       var list = st.leads.filter(function (l) { return !q || (l.name + ' ' + l.business + ' ' + l.whatsapp + ' ' + l.niche).toLowerCase().indexOf(q) > -1; });
       var by = {}; LEAD_ST.forEach(function (s) { by[s] = []; }); list.forEach(function (l) { (by[l.status] || by.nuevo).push(l); });
-      return A.head('Leads', S.num(st.leads.length) + ' en total', '<button class="btn btn-ghost btn-sm" data-a="export" data-t="leads" type="button"><span>' + K.ic('download') + ' Exportar CSV</span></button>') +
+      return A.head('Leads', S.num(st.leads.length) + ' en total', '<button class="btn btn-primary btn-sm" data-a="newlead" type="button"><span>+ Lead</span></button> <button class="btn btn-ghost btn-sm" data-a="export" data-t="leads" type="button"><span>' + K.ic('download') + ' Exportar CSV</span></button>') +
         '<div class="tools"><input type="search" id="leadq" placeholder="Buscar por nombre, negocio, teléfono…" value="' + e(st.leadQ || '') + '" aria-label="Buscar leads"></div>' +
         (st.leads.length ? '<div class="kan">' + LEAD_ST.map(function (s) {
           return '<div class="kcol" data-drop="' + s + '"><h3><span>' + s + '</span><span>' + by[s].length + '</span></h3>' + by[s].map(function (l) {
@@ -84,7 +85,7 @@
     return api.get('/admin/orders').then(function (r) {
       if (!r.ok) return A.head('Pedidos') + '<div class="alert bad">' + e(A.msg(r)) + '</div>';
       var os = r.data.orders, paid = os.filter(function (o) { return o.status === 'pagado'; }), pend = os.filter(function (o) { return o.status === 'pendiente'; });
-      return A.head('Pedidos', 'Compras de paquetes', '<button class="btn btn-ghost btn-sm" data-a="export" data-t="orders" type="button"><span>' + K.ic('download') + ' Exportar CSV</span></button>') +
+      return A.head('Pedidos', 'Compras de paquetes', '<button class="btn btn-primary btn-sm" data-a="neworder" type="button"><span>+ Pedido</span></button> <button class="btn btn-ghost btn-sm" data-a="export" data-t="orders" type="button"><span>' + K.ic('download') + ' Exportar CSV</span></button>') +
         '<div class="grid-a ga3" style="margin-bottom:16px">' + K.stat('Cobrado', S.money(paid.reduce(function (a, o) { return a + o.amount; }, 0)), paid.length + ' pedidos', 'var(--accent3)') + K.stat('Por confirmar', S.money(pend.reduce(function (a, o) { return a + o.amount; }, 0)), pend.length + ' pedidos', 'var(--sun)') + K.stat('Pedidos totales', S.num(os.length)) + '</div>' +
         (os.length ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Cliente</th><th>Paquete</th><th class="num">Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th></th></tr></thead><tbody>' + os.map(function (o) {
           return '<tr><td>' + o.id + '</td><td>' + e(o.user_name || '—') + '<div class="hint">' + e(o.user_email || '') + '</div></td><td>' + e(o.package_name) + '</td><td class="num">' + S.money(o.amount) + '</td><td>' + e(o.method || '—') + '</td><td>' + K.tag(o.status) + '</td><td>' + e(ui.fmtDate(o.created_at)) + '</td><td style="white-space:nowrap">' +

@@ -34,6 +34,10 @@
     function needAdmin() { return !u ? err(401, 'no_session') : u.role !== 'admin' ? err(403, 'forbidden') : null; }
     var done = Promise.resolve();
     var r = (function () {
+      if (g.LF.demoWeb) {   // endpoints de página web, avisos y panel ampliado (lf-demo-web.js)
+        var x = g.LF.demoWeb({ db: db, method: method, q: q, b: b, u: u, h: { id: id, now: now, res: res, err: err, str: str, content: content, clientOf: clientOf, newClient: newClient, save: save, pubUser: pubUser, cOut: cOut, need: need, needAdmin: needAdmin } });
+        if (x !== undefined) return x;
+      }
       if (method === 'GET' && q === '/health') return res(200, { ok: true, demo: true, stripe: false, turnstile: '', needsSetup: false });
       if (method === 'GET' && q === '/content') return res(200, { ok: true, content: content(db), hash: S.contentHash(content(db)) });
       if (method === 'GET' && q === '/me') return res(200, { ok: true, user: u ? pubUser(u) : null });

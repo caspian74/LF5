@@ -51,9 +51,9 @@ r = await user('GET', '/tickets/' + tid); ok(r.data.messages.length === 2 && r.d
 r = await admin('GET', '/admin/overview'); ok(r.data.mrr === 9900, 'MRR calculado ' + r.data.mrr);
 
 r = await admin('GET', '/admin/content'); const content = r.data.content;
-content.hero.title = 'Título <script>alert(1)</script> ||nuevo||'; content.theme.accent = 'javascript:1'; content.packages.items[0].price = 5100; content.packages.items[0].paymentLink = 'javascript:alert(1)';
+content.hero.title = 'Título <script>alert(1)</script> ||nuevo||'; content.theme.accent = 'javascript:1'; content.packages.items.find((p) => p.id === 'arranque').price = 5100; content.packages.items.find((p) => p.id === 'arranque').paymentLink = 'javascript:alert(1)';
 r = await admin('PUT', '/admin/content', { content, label: 'prueba' }); ok(r.data.ok, 'guardar contenido');
-r = await anon('GET', '/content'); ok(r.data.content.hero.title.includes('nuevo') && r.data.content.theme.accent === '#FF3B5C' && r.data.content.packages.items[0].paymentLink === '', 'contenido saneado y público');
+r = await anon('GET', '/content'); ok(r.data.content.hero.title.includes('nuevo') && r.data.content.theme.accent === '#FF3B5C' && r.data.content.packages.items.find((p) => p.id === 'arranque').paymentLink === '', 'contenido saneado y público');
 r = await user('POST', '/checkout', { packageId: 'arranque' }); ok(r.data.whatsapp.includes(encodeURIComponent('$5,100')), 'checkout usa precio del servidor');
 r = await user('PUT', '/admin/content', { content }); ok(r.status === 405 || r.status === 403, 'cliente no edita sitio');
 r = await admin('GET', '/admin/versions'); ok(r.data.versions.length === 1, 'versión guardada');
@@ -76,6 +76,63 @@ let w = await fetch(base + '/api/stripe/webhook', { method: 'POST', headers: { '
 w = await fetch(base + '/api/stripe/webhook', { method: 'POST', headers: { 'stripe-signature': `t=${t - 4000},v1=${sign(t - 4000)}` }, body: payload }); ok(w.status === 400, 'webhook firma vieja');
 w = await fetch(base + '/api/stripe/webhook', { method: 'POST', headers: { 'stripe-signature': `t=${t},v1=${sign(t)}` }, body: payload }); ok(w.status === 200, 'webhook firma válida');
 r = await user('GET', '/portal'); ok(r.data.orders.find((o) => o.id === oid2).status === 'pagado' && r.data.client.plan === 'dominancia' && r.data.client.billing, 'webhook activa plan');
+
+
+// ---- Página web: compra única, panel, visitas y mensajes del sitio ----
+const wuser = client(), wrnd = crypto.randomBytes(3).toString('hex');
+r = await wuser('POST', '/auth/register', { name: 'Dra. Web', email: `w${wrnd}@ejemplo.com`, password: 'una-clave-larga-1', business: 'Clínica Web' }); ok(r.status === 201, 'registro cliente web');
+r = await wuser('POST', '/checkout', { packageId: 'sitio' }); ok(r.data.manual && decodeURIComponent(r.data.whatsapp).includes('5,900') && /pago único/i.test(decodeURIComponent(r.data.whatsapp)), 'checkout sitio: precio y pago único');
+const woid = r.data.orderId;
+r = await wuser('POST', '/checkout', { packageId: 'sitio', addon: 'maint' }); ok(r.data.manual && decodeURIComponent(r.data.whatsapp).includes('490'), 'checkout mantenimiento $490');
+r = await wuser('GET', '/portal/site'); ok(r.status === 403, 'portal/site cerrado sin proyecto web');
+r = await admin('PATCH', '/admin/orders/' + woid, { status: 'pagado' }); ok(r.data.ok, 'admin marca pagado el sitio');
+r = await wuser('GET', '/portal'); ok(r.data.client.data.web.enabled && r.data.client.kinds.web && !r.data.client.kinds.mkt && r.data.client.siteKey.startsWith('lf_') && !r.data.client.data.admin, 'proyecto web activado, sin datos internos');
+const wid = r.data.client.id, skey = r.data.client.siteKey;
+r = await wuser('PUT', '/portal/web/brief', { brief: { about: 'Clínica dental familiar', whatsapp: '6641234567' } }); ok(r.data.ok, 'cliente llena brief');
+r = await wuser('POST', '/portal/web/change', { title: 'Cambiar foto del inicio', detail: 'Usar la nueva' }); ok(r.status === 201, 'cliente pide cambio');
+r = await wuser('POST', '/portal/web/file', { title: 'Logo', url: 'javascript:alert(1)' }); ok(r.status === 400, 'archivo con javascript: rechazado');
+r = await wuser('POST', '/portal/web/file', { title: 'Logo', url: 'https://drive.google.com/x' }); ok(r.status === 201, 'archivo https aceptado');
+r = await wuser('GET', '/portal'); ok(r.data.client.data.web.brief.about.includes('dental') && r.data.client.data.web.changes.length === 1 && r.data.client.data.web.files.length === 1, 'brief, cambio y archivo guardados');
+r = await admin('PATCH', '/admin/clients/' + wid + '/web', { stage: 'diseno', note: 'Primer diseño listo', domain: 'clinicaweb.mx' }); ok(r.data.ok && r.data.web.stage === 'diseno' && r.data.web.domain === 'clinicaweb.mx', 'admin avanza etapa');
+const chId = (await wuser('GET', '/portal')).data.client.data.web.changes[0].id;
+r = await admin('PATCH', '/admin/clients/' + wid + '/web', { change: { id: chId, status: 'lista', reply: 'Hecho' } }); ok(r.data.web.changes[0].status === 'lista' && r.data.web.changes[0].reply === 'Hecho', 'admin responde cambio');
+r = await admin('GET', '/admin/web'); ok(r.data.projects.some((p) => p.id === wid && p.stage === 'diseno'), 'tablero de proyectos web');
+
+// llave del sitio + tracking público (sin cookies ni X-LF, desde otro origen)
+const pub = (path, body, ua = 'Mozilla/5.0 (iPhone; Mobile)') => fetch(base + '/api' + path, { method: 'POST', headers: { 'content-type': 'text/plain', origin: 'https://clinicaweb.mx', 'user-agent': ua }, body: JSON.stringify(body) });
+let pr = await pub('/collect', { k: skey, t: 'view', p: '/', r: 'https://www.google.com/' }); ok(pr.status === 204 && pr.headers.get('access-control-allow-origin') === '*', 'collect view 204 + CORS');
+await pub('/collect', { k: skey, t: 'view', p: '/', r: '', s: 'facebook' });
+await pub('/collect', { k: skey, t: 'wa' });
+pr = await pub('/collect', { k: skey, t: 'view' }, 'Googlebot/2.1'); ok(pr.status === 204, 'bots ignorados');
+pr = await pub('/collect', { k: 'lf_' + wid + '_0000000000', t: 'view' }); ok(pr.status === 204, 'llave falsa no revela nada');
+pr = await fetch(base + '/api/collect', { method: 'OPTIONS', headers: { origin: 'https://x.mx' } }); ok(pr.status === 204 && pr.headers.get('access-control-allow-origin') === '*', 'preflight CORS');
+pr = await pub('/site-lead', { k: skey, name: 'Paciente Uno', phone: '6649998888', message: 'Quiero cita', p: '/' }); ok(pr.status === 201, 'mensaje del sitio recibido');
+pr = await pub('/site-lead', { k: skey, name: 'Spam', phone: '1', website: 'x' }); ok(pr.status === 200, 'site-lead honeypot');
+pr = await pub('/site-lead', { k: 'lf_1_bad', name: 'X', phone: '6641111111' }); ok(pr.status === 404, 'site-lead llave inválida');
+pr = await pub('/site-lead', { k: skey, name: 'Sin contacto' }); ok(pr.status === 400, 'site-lead sin contacto');
+r = await wuser('GET', '/portal/site'); ok(r.data.totals.view === 2 && r.data.totals.wa === 1 && r.data.totals.form === 1 && r.data.leads.length === 1 && r.data.sources.some((x) => x.k === 'google') && r.data.sources.some((x) => x.k === 'facebook') && r.data.devices[0].k === 'movil', 'estadísticas del sitio ' + JSON.stringify(r.data.totals));
+r = await wuser('PATCH', '/portal/site-leads/' + r.data.leads[0].id, { status: 'atendido' }); ok(r.data.ok, 'marcar mensaje atendido');
+const other = client(); await other('POST', '/auth/register', { name: 'Otro', email: `o${wrnd}@ejemplo.com`, password: 'una-clave-larga-1' });
+r = await other('GET', '/portal/site'); ok(r.status === 403, 'otro cliente no ve las visitas');
+
+// admin: vista como cliente, buscador, avisos, manuales, sistema
+r = await admin('GET', '/admin/clients/' + wid + '/portal'); ok(r.data.readonly && r.data.client.data.web.enabled && r.data.site.totals.view === 2 && !r.data.client.data.admin, 'ver como cliente');
+r = await admin('GET', '/admin/clients/' + wid + '/site'); ok(r.data.leads.length === 1 && r.data.key === skey, 'admin ve sitio del cliente');
+r = await admin('GET', '/admin/search?q=Cl%C3%ADnica'); ok(r.data.results.some((x) => x.type === 'cliente' && x.id === wid), 'buscador global');
+r = await admin('PUT', '/admin/announcements', { announcements: [{ text: 'Mantenimiento el sábado', level: 'warn', audience: 'web' }, { text: '<b>x</b>', level: 'zzz' }] }); ok(r.data.announcements.length === 2 && r.data.announcements[1].level === 'info', 'avisos guardados y saneados');
+r = await wuser('GET', '/portal'); ok(r.data.announcements.some((a) => a.text.includes('sábado')), 'cliente web ve aviso');
+r = await user('GET', '/portal'); ok(!r.data.announcements.some((a) => a.text.includes('sábado')), 'aviso solo para su público');
+r = await admin('POST', '/admin/orders', { clientId: wid, packageId: 'sitio', amount: 1200, packageName: 'Página adicional', paid: true }); ok(r.status === 201, 'pedido manual pagado');
+r = await admin('POST', '/admin/leads', { name: 'Lead manual', business: 'Óptica Sol', whatsapp: '6641112233' }); ok(r.status === 201, 'lead manual');
+r = await admin('GET', '/admin/overview'); ok(typeof r.data.revenueOneTime === 'number' && r.data.webStages && Array.isArray(r.data.attention), 'overview con web y atención');
+r = await admin('GET', '/admin/system'); ok(r.data.ok && r.data.schema === 2 && r.data.rows.clients > 0, 'estado del sistema');
+r = await admin('GET', '/admin/export/siteleads'); ok(typeof r.data === 'string' && r.data.includes('Paciente Uno'), 'exportar mensajes de sitios');
+r = await admin('POST', '/admin/clients', { name: 'Solo web', business: 'Taller', web: true }); ok(r.status === 201, 'admin crea cliente web');
+// mantenimiento pagado no pisa plan
+const mo = (await wuser('POST', '/checkout', { packageId: 'sitio', addon: 'maint' })).data.orderId;
+await admin('PATCH', '/admin/orders/' + mo, { status: 'pagado' });
+r = await wuser('GET', '/portal'); ok(r.data.client.data.web.maintenance === true && r.data.client.plan === 'sitio', 'mantenimiento activado');
+r = await admin('GET', '/admin/overview'); ok(r.data.mrr >= 9900 + 490, 'MRR incluye mantenimiento ' + r.data.mrr);
 
 // login / logout / disable
 const u2 = client();

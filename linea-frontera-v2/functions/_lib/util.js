@@ -71,3 +71,20 @@ export async function verifyTurnstile(env, token, ip) {
     return !!j.success;
   } catch { return false; }
 }
+
+/** Día calendario en Tijuana (AAAA-MM-DD). Las estadísticas se agrupan por este día. */
+export function localDay(d = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Tijuana', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+}
+export function daysAgoLocal(n) { return localDay(new Date(Date.now() - n * 86400000)); }
+
+/** Aviso opcional por webhook (Discord, Slack, Zapier) y/o correo con Resend. Nunca rompe la petición. */
+export function notify(env, waitUntil, { subject, text, to }) {
+  const jobs = [];
+  if (env.NOTIFY_WEBHOOK) jobs.push(fetch(env.NOTIFY_WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: subject + '\n' + text, content: subject + '\n' + text }) }).catch(() => {}));
+  const rcpt = [...new Set([to, env.NOTIFY_EMAIL].filter(Boolean))];
+  if (env.RESEND_API_KEY && rcpt.length) jobs.push(fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({ from: env.RESEND_FROM || 'Línea Frontera <onboarding@resend.dev>', to: rcpt, subject, text }) }).catch(() => {}));
+  for (const j of jobs) waitUntil(j);
+  return { webhook: !!env.NOTIFY_WEBHOOK, email: !!(env.RESEND_API_KEY && rcpt.length) };
+}
