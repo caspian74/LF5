@@ -222,7 +222,7 @@ add('POST', '/checkout', 'user', async ({ req, env, user, body }) => {
     return json({ ok: true, orderId, url: u.toString() });
   }
   await env.DB.prepare("UPDATE orders SET method = 'manual' WHERE id = ?").bind(orderId).run();
-  const msg = `Hola, quiero contratar ${maint ? 'el mantenimiento de mi página web' : 'el paquete ' + pkg.name} (${S.money(price)} MXN${recurring ? '/mes' : ', pago único'}). Pedido #${orderId}.`;
+  const msg = `Hola, quiero contratar ${maint ? 'el mantenimiento de mi página web' : 'el paquete ' + pkg.name} (${S.money(price)} MXN${recurring ? '/mes' : ', pago único'}).`;
   return json({ ok: true, orderId, manual: true, whatsapp: S.waLink(content.brand.whatsapp, msg), package: { name: orderName, price, recurring } });
 });
 
