@@ -61,11 +61,10 @@
     });
   }
 
-  function openBuyModal(r, pkgName, pkg) {
+  function openBuyModal(r, pkgName) {
     var d = $('#buy-modal'); if (!d) return;
     $('#buy-title', d).textContent = 'Recibimos tu pedido de ' + pkgName;
-    var one = pkg && pkg.kind === 'unico';
-    $('#buy-text', d).textContent = 'Pedido #' + r.orderId + '. Escríbenos por WhatsApp para confirmar el pago (tarjeta o transferencia). ' + (one ? 'En cuanto se confirme, activamos tu panel de página web: ahí llenas tu información, ves el avance y pides cambios.' : 'En cuanto se confirme, activamos tu cuenta con panel completo.');
+    $('#buy-text', d).textContent = 'Pedido #' + r.orderId + '. Escríbenos por WhatsApp para confirmar el pago (tarjeta o transferencia). En cuanto se confirme, activamos tu cuenta con panel completo.';
     $('#buy-wa', d).href = r.whatsapp;
     d.showModal();
   }
@@ -80,27 +79,9 @@
         if (!r.ok) { ui.toast(api.errText(r)); return; }
         ui.track('checkout_started', { package: pkgId, value: pkg.price, currency: 'MXN' });
         if (r.data.url) { location.href = r.data.url; return; }
-        openBuyModal(r.data, pkg.name, pkg);
+        openBuyModal(r.data, pkg.name);
       });
     }).then(function () { btn.disabled = false; }, function () { btn.disabled = false; });
-  }
-
-  // cuenta animada en los KPI y brillo que sigue al puntero en las tarjetas
-  function initFx() {
-    var reduce = g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || !('IntersectionObserver' in g)) return;
-    var obs = new IntersectionObserver(function (list) {
-      list.forEach(function (en) {
-        if (!en.isIntersecting) return; obs.unobserve(en.target);
-        var el = en.target, raw = el.getAttribute('data-count') || '', m = /^([^\d-]*)([\d,]+(?:\.\d+)?)(.*)$/.exec(raw); if (!m) return;
-        var end = parseFloat(m[2].replace(/,/g, '')), dec = (m[2].split('.')[1] || '').length, t0 = performance.now();
-        (function step(t) { var k = Math.min(1, (t - t0) / 900), v = end * (1 - Math.pow(1 - k, 3)); el.textContent = m[1] + v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[3]; if (k < 1) requestAnimationFrame(step); else el.textContent = raw; })(t0);
-      });
-    }, { threshold: 0.5 });
-    $$('.kpi strong[data-count]').forEach(function (el) { obs.observe(el); });
-    if (g.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      $$('.card').forEach(function (c) { c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }, { passive: true }); });
-    }
   }
 
   function bind() {
@@ -116,7 +97,7 @@
     $$('[data-buy]').forEach(function (b) { b.addEventListener('click', function () { buy(b.dataset.buy, b); }); });
     $$('[data-track]').forEach(function (a) { a.addEventListener('click', function () { ui.track(a.dataset.track, { where: a.dataset.where || '' }); }); });
     var d = $('#buy-modal'); if (d) { d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('.modal-x')) d.close(); }); }
-    initCalc(); initForm(); reveal(); initFx();
+    initCalc(); initForm(); reveal();
     var onScroll = function () { if (top) top.classList.toggle('stuck', g.scrollY > 8); };
     if (!bound) { g.addEventListener('scroll', onScroll, { passive: true }); bound = true; } onScroll();
   }

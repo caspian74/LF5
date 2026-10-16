@@ -1,11 +1,20 @@
 import { add, json, fail } from './router.js';
-import { now, str, isEmail, int, rateLimit, getIp, verifyTurnstile, randomHex, audit, safeEqual, notify } from './util.js';
+import { now, str, isEmail, int, rateLimit, getIp, verifyTurnstile, randomHex, audit, safeEqual } from './util.js';
 import { hashPassword, checkPassword, startSession, endSession } from './auth.js';
 import { getContent, S } from './content.js';
 import { stripeApi, verifyStripeSignature, markOrderPaid } from './stripe.js';
-import { parse, publicUser, clientFor, saveClientData, portalPayload } from './clients.js';
 
-export { clientFor, clientOut } from './clients.js';
+const parse = (s, d) => { try { return JSON.parse(s); } catch { return d; } };
+const publicUser = (u) => ({ id: u.id, email: u.email, name: u.name, business: u.business, phone: u.phone, role: u.role });
+const clientOut = (c) => c && ({ id: c.id, name: c.name, business: c.business, email: c.email, phone: c.phone, plan: c.plan, status: c.status, updated_at: c.updated_at, billing: !!c.stripe_customer, data: S.sanitizeClientData(parse(c.data, {})) });
+
+export async function clientFor(env, userId) {
+  return env.DB.prepare('SELECT * FROM clients WHERE user_id = ? ORDER BY id LIMIT 1').bind(userId).first();
+}
+async function saveClientData(env, id, data) {
+  await env.DB.prepare('UPDATE clients SET data = ?, updated_at = ? WHERE id = ?').bind(JSON.stringify(S.sanitizeClientData(data)), now(), id).run();
+}
+
 // ---------- público ----------
 add('GET', '/health', 'public', async ({ env }) => {
   const admin = await env.DB.prepare("SELECT 1 AS x FROM users WHERE role = 'admin' LIMIT 1").first();
@@ -31,7 +40,10 @@ add('POST', '/lead', 'public', async ({ req, env, body, waitUntil }) => {
   for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'landing']) if (b.utm && b.utm[k]) utm[k] = str(b.utm[k], 120);
   const res = await env.DB.prepare('INSERT INTO leads (name, business, whatsapp, niche, message, utm, created_at) VALUES (?,?,?,?,?,?,?)')
     .bind(name, business, wa, str(b.niche, 80), str(b.message, 600), JSON.stringify(utm), now()).run();
-  notify(env, waitUntil, { subject: 'Nuevo lead: ' + business, text: `${name} (${business}) · WhatsApp ${wa}\nGiro: ${str(b.niche, 80)}\nMensaje: ${str(b.message, 600)}` });
+  const text = `Nuevo lead: ${name} (${business}) WhatsApp ${wa}`;
+  if (env.NOTIFY_WEBHOOK) waitUntil(fetch(env.NOTIFY_WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, content: text }) }).catch(() => {}));
+  if (env.RESEND_API_KEY && env.NOTIFY_EMAIL) waitUntil(fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({ from: env.RESEND_FROM || 'Línea Frontera <onboarding@resend.dev>', to: [env.NOTIFY_EMAIL], subject: 'Nuevo lead: ' + business, text: `${text}\nGiro: ${str(b.niche, 80)}\nMensaje: ${str(b.message, 600)}` }) }).catch(() => {}));
   return json({ ok: true, id: res.meta?.last_row_id ?? null }, 201);
 });
 
@@ -103,7 +115,12 @@ add('POST', '/auth/change-password', 'user', async ({ env, user, body, req }) =>
 });
 
 // ---------- portal del cliente ----------
-add('GET', '/portal', 'user', async ({ env, user }) => json(await portalPayload(env, user, await clientFor(env, user.id))));
+add('GET', '/portal', 'user', async ({ env, user }) => {
+  const c = await clientFor(env, user.id);
+  const orders = (await env.DB.prepare('SELECT id, package_id, package_name, amount, currency, status, method, created_at, paid_at FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 50').bind(user.id).all()).results;
+  const tickets = (await env.DB.prepare('SELECT id, subject, status, updated_at FROM tickets WHERE user_id = ? ORDER BY updated_at DESC LIMIT 50').bind(user.id).all()).results;
+  return json({ ok: true, user: publicUser(user), client: clientOut(c), orders, tickets, serverTime: now() });
+});
 
 add('PATCH', '/portal/profile', 'user', async ({ env, user, body }) => {
   const b = await body();
@@ -186,10 +203,6 @@ add('POST', '/checkout', 'user', async ({ req, env, user, body }) => {
   const { content } = await getContent(env);
   const pkg = content.packages.items.find((p) => p.id === String(b.packageId));
   if (!pkg) return fail(404, 'package_not_found');
-  const maint = b.addon === 'maint';                       // mantenimiento mensual de la página web
-  if (maint && !(pkg.kind === 'unico' && pkg.maint > 0)) return fail(400, 'no_maintenance');
-  const price = maint ? pkg.maint : pkg.price, recurring = maint || pkg.kind !== 'unico';
-  const orderPkgId = maint ? pkg.id + '-mant' : pkg.id, orderName = maint ? 'Mantenimiento · ' + pkg.name : pkg.name;
   let c = await clientFor(env, user.id);
   if (!c) {
     const t = now();
@@ -198,32 +211,28 @@ add('POST', '/checkout', 'user', async ({ req, env, user, body }) => {
   }
   const origin = new URL(req.url).origin;
   const o = await env.DB.prepare("INSERT INTO orders (user_id, client_id, package_id, package_name, amount, currency, status, method, created_at) VALUES (?,?,?,?,?, 'MXN', 'pendiente', ?, ?)")
-    .bind(user.id, c.id, orderPkgId, orderName, Math.round(price), '', now()).run();
+    .bind(user.id, c.id, pkg.id, pkg.name, Math.round(pkg.price), '', now()).run();
   const orderId = o.meta.last_row_id;
-  const priceId = maint ? pkg.maintStripePriceId : pkg.stripePriceId;
-  if (env.STRIPE_SECRET_KEY && priceId) {
+  if (env.STRIPE_SECRET_KEY && pkg.stripePriceId) {
     try {
-      const params = {
-        mode: recurring ? 'subscription' : 'payment', 'line_items[0][price]': priceId, 'line_items[0][quantity]': 1,
+      const s = await stripeApi(env, 'checkout/sessions', {
+        mode: 'subscription', 'line_items[0][price]': pkg.stripePriceId, 'line_items[0][quantity]': 1,
         success_url: `${origin}/gracias.html?o=${orderId}`, cancel_url: `${origin}/#paquetes`,
         client_reference_id: orderId, customer_email: user.email, locale: 'es',
-        'metadata[order_id]': orderId, 'metadata[package_id]': orderPkgId,
-      };
-      if (recurring) params['subscription_data[metadata][order_id]'] = orderId; else params.customer_creation = 'always';
-      const s = await stripeApi(env, 'checkout/sessions', params);
+        'metadata[order_id]': orderId, 'metadata[package_id]': pkg.id, 'subscription_data[metadata][order_id]': orderId,
+      });
       await env.DB.prepare("UPDATE orders SET method = 'stripe', stripe_session = ? WHERE id = ?").bind(s.id, orderId).run();
       return json({ ok: true, orderId, url: s.url });
     } catch (e) { console.error('stripe', e.message); return fail(502, 'payment_provider_error'); }
   }
-  const link = maint ? '' : pkg.paymentLink;
-  if (link && /^https:\/\//.test(link)) {
-    const u = new URL(link); u.searchParams.set('client_reference_id', String(orderId)); u.searchParams.set('prefilled_email', user.email);
+  if (pkg.paymentLink && /^https:\/\//.test(pkg.paymentLink)) {
+    const u = new URL(pkg.paymentLink); u.searchParams.set('client_reference_id', String(orderId)); u.searchParams.set('prefilled_email', user.email);
     await env.DB.prepare("UPDATE orders SET method = 'enlace' WHERE id = ?").bind(orderId).run();
     return json({ ok: true, orderId, url: u.toString() });
   }
   await env.DB.prepare("UPDATE orders SET method = 'manual' WHERE id = ?").bind(orderId).run();
-  const msg = `Hola, quiero contratar ${maint ? 'el mantenimiento de mi página web' : 'el paquete ' + pkg.name} (${S.money(price)} MXN${recurring ? '/mes' : ', pago único'}).`;
-  return json({ ok: true, orderId, manual: true, whatsapp: S.waLink(content.brand.whatsapp, msg), package: { name: orderName, price, recurring } });
+  const msg = `Hola, quiero contratar el paquete ${pkg.name} (${S.money(pkg.price)} MXN/mes). Pedido #${orderId}.`;
+  return json({ ok: true, orderId, manual: true, whatsapp: S.waLink(content.brand.whatsapp, msg), package: { name: pkg.name, price: pkg.price } });
 });
 
 add('POST', '/billing-portal', 'user', async ({ req, env, user }) => {

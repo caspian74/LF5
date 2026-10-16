@@ -16,23 +16,13 @@ function csv(rows, cols, name) {
 
 add('GET', '/admin/overview', 'admin', async ({ env }) => {
   const { content } = await getContent(env);
-  const clients = await all(env, 'SELECT id, name, business, plan, status, data FROM clients');
+  const price = Object.fromEntries(content.packages.items.map((p) => [p.id, p.price]));
+  const clients = await all(env, 'SELECT id, plan, status, data FROM clients');
   let mrr = 0, active = 0, spend = 0, leads30 = 0, sales30 = 0;
-  const stages = { brief: 0, diseno: 0, desarrollo: 0, revision: 0, publicado: 0 }, attention = [];
-  const today = new Date().toISOString().slice(0, 10);
   for (const c of clients) {
-    const data = S.sanitizeClientData(parse(c.data, {}));
-    if (c.status === 'activo') { active++; mrr += S.monthlyValue(content, { plan: c.plan, data }); }
-    const t = S.totals(data);
+    if (c.status === 'activo') { active++; mrr += price[c.plan] || 0; }
+    const t = S.totals(S.sanitizeClientData(parse(c.data, {})));
     spend += t.spend; leads30 += t.leads; sales30 += t.sales;
-    const nm = c.business || c.name;
-    if (data.web.enabled) {
-      stages[data.web.stage] = (stages[data.web.stage] || 0) + 1;
-      const pend = S.webPendingChanges(data);
-      if (pend) attention.push({ id: c.id, name: nm, why: pend + ' cambio(s) web por atender', kind: 'cambio' });
-      if (data.web.dueDate && data.web.dueDate < today && data.web.stage !== 'publicado') attention.push({ id: c.id, name: nm, why: 'Entrega vencida (' + data.web.dueDate + ')', kind: 'vencido' });
-    }
-    if (data.admin.nextDate && data.admin.nextDate <= today && c.status !== 'cancelado') attention.push({ id: c.id, name: nm, why: 'Seguimiento: ' + (data.admin.nextAction || 'pendiente'), kind: 'seguimiento' });
   }
   const since = new Date(Date.now() - 13 * 86400000).toISOString().slice(0, 10);
   const byDay = await all(env, 'SELECT substr(created_at,1,10) AS d, COUNT(*) AS n FROM leads WHERE substr(created_at,1,10) >= ? GROUP BY d', since);
@@ -43,9 +33,6 @@ add('GET', '/admin/overview', 'admin', async ({ env }) => {
     counts: { users: await one('SELECT COUNT(*) AS n FROM users'), clients: clients.length, activeClients: active, leadsNew: await one("SELECT COUNT(*) AS n FROM leads WHERE status = 'nuevo'"), leadsTotal: await one('SELECT COUNT(*) AS n FROM leads'),
       ordersPending: await one("SELECT COUNT(*) AS n FROM orders WHERE status = 'pendiente'"), ticketsOpen: await one("SELECT COUNT(*) AS n FROM tickets WHERE status != 'resuelto'") },
     mrr, revenuePaid: await one("SELECT COALESCE(SUM(amount),0) AS n FROM orders WHERE status = 'pagado'"),
-    revenueOneTime: await one("SELECT COALESCE(SUM(amount),0) AS n FROM orders WHERE status = 'pagado' AND package_id NOT LIKE '%-mant' AND package_id IN ('sitio')"),
-    webStages: stages, attention: attention.slice(0, 12),
-    siteLeadsNew: await one("SELECT COUNT(*) AS n FROM site_leads WHERE status = 'nuevo'"),
     clientsTotals: { spend, leads: leads30, sales: sales30 }, leadSeries: series,
     leadsByStatus: await all(env, 'SELECT status, COUNT(*) AS n FROM leads GROUP BY status'),
     recentLeads: await all(env, 'SELECT id, name, business, whatsapp, status, created_at FROM leads ORDER BY id DESC LIMIT 6'),
@@ -54,14 +41,8 @@ add('GET', '/admin/overview', 'admin', async ({ env }) => {
 
 // ----- clientes -----
 add('GET', '/admin/clients', 'admin', async ({ env }) => {
-  const { content } = await getContent(env);
   const rows = await all(env, 'SELECT c.id, c.user_id, c.name, c.business, c.email, c.phone, c.plan, c.status, c.claim_code, c.updated_at, c.created_at, c.data, u.email AS user_email, u.disabled FROM clients c LEFT JOIN users u ON u.id = c.user_id ORDER BY c.id DESC LIMIT 500');
-  return json({ ok: true, clients: rows.map(({ data, ...r }) => {
-    const d = S.sanitizeClientData(parse(data, {}));
-    return { ...r, totals: S.totals(d), kinds: S.clientKinds(content, { plan: r.plan, data: d }),
-      web: d.web.enabled ? { stage: d.web.stage, pending: S.webPendingChanges(d), due: d.web.dueDate } : null,
-      next: d.admin.nextDate ? { date: d.admin.nextDate, action: d.admin.nextAction } : null, tags: d.admin.tags };
-  }) });
+  return json({ ok: true, clients: rows.map(({ data, ...r }) => ({ ...r, totals: S.totals(S.sanitizeClientData(parse(data, {}))) })) });
 });
 add('GET', '/admin/clients/:id', 'admin', async ({ env, params }) => {
   const c = await env.DB.prepare('SELECT * FROM clients WHERE id = ?').bind(int(params.id)).first();
@@ -79,17 +60,12 @@ add('PUT', '/admin/clients/:id', 'admin', async ({ env, params, body, user }) =>
   await audit(env, user.id, 'client_update', String(id));
   return json({ ok: true });
 });
-function newData(b) {
-  let d = b.example ? S.exampleClientData() : S.emptyClientData();
-  if (b.web) d = S.webActivate(d, 'Proyecto de página web creado por el equipo.');
-  return d;
-}
 add('POST', '/admin/clients', 'admin', async ({ env, body, user }) => {
   const b = await body(); const name = str(b.name, 80), t = now();
   if (!name) return fail(400, 'missing_name');
   const code = randomHex(4).toUpperCase();
   const r = await env.DB.prepare("INSERT INTO clients (name, business, email, phone, plan, status, data, claim_code, created_at, updated_at) VALUES (?,?,?,?,?, 'onboarding', ?, ?, ?, ?)")
-    .bind(name, str(b.business, 100), str(b.email, 254), str(b.phone, 20), str(b.plan, 40).replace(/[^a-z0-9_-]/gi, ''), JSON.stringify(newData(b)), code, t, t).run();
+    .bind(name, str(b.business, 100), str(b.email, 254), str(b.phone, 20), str(b.plan, 40).replace(/[^a-z0-9_-]/gi, ''), JSON.stringify(b.example ? S.exampleClientData() : S.emptyClientData()), code, t, t).run();
   await audit(env, user.id, 'client_create', String(r.meta.last_row_id));
   return json({ ok: true, id: r.meta.last_row_id, claimCode: code }, 201);
 });
@@ -209,7 +185,6 @@ add('GET', '/admin/export/:type', 'admin', async ({ env, params }) => {
   if (params.type === 'leads') return csv(await all(env, 'SELECT id, name, business, whatsapp, niche, message, status, utm, created_at FROM leads ORDER BY id'), ['id', 'name', 'business', 'whatsapp', 'niche', 'message', 'status', 'utm', 'created_at'], 'leads.csv');
   if (params.type === 'clients') return csv(await all(env, 'SELECT id, name, business, email, phone, plan, status, created_at FROM clients ORDER BY id'), ['id', 'name', 'business', 'email', 'phone', 'plan', 'status', 'created_at'], 'clientes.csv');
   if (params.type === 'orders') return csv(await all(env, 'SELECT id, package_name, amount, currency, status, method, created_at, paid_at FROM orders ORDER BY id'), ['id', 'package_name', 'amount', 'currency', 'status', 'method', 'created_at', 'paid_at'], 'pedidos.csv');
-  if (params.type === 'siteleads') return csv(await all(env, 'SELECT s.id, c.business AS cliente, s.name, s.phone, s.email, s.message, s.page, s.status, s.created_at FROM site_leads s LEFT JOIN clients c ON c.id = s.client_id ORDER BY s.id'), ['id', 'cliente', 'name', 'phone', 'email', 'message', 'page', 'status', 'created_at'], 'mensajes-sitios.csv');
   return fail(404, 'not_found');
 });
 add('GET', '/admin/audit', 'admin', async ({ env }) =>

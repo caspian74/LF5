@@ -2,25 +2,10 @@
 
 Sitio de agencia de marketing para Tijuana. Todo corre en Cloudflare (gratis para empezar) y se despliega desde GitHub.
 
-- **Landing** (`/`): portada moderna, servicios, sección de páginas web, proceso, panel de ejemplo, paquetes (mensuales y de **pago único**), calculadora, FAQ y formulario de diagnóstico.
-- **Paquete "Página Web"**: $5,900 MXN pago único (editable), mantenimiento opcional de $490/mes. Al pagarlo se crea el **proyecto web** del cliente.
+- **Landing** (`/`): portada animada, servicios, proceso, panel de ejemplo, paquetes con botón de compra, calculadora, FAQ y formulario de diagnóstico.
 - **Cuentas** (`/auth.html`): registro e inicio de sesión.
-- **Portal del cliente** (`/dashboard.html`): clientes de marketing ven KPIs, campañas, contenido y SEO; clientes de **página web** ven avance por etapas, su información (brief), cambios, visitas y mensajes de su página. Ambos: paquete, pagos, soporte y avisos tuyos.
-- **Admin** (`/admin.html`): resumen con "requiere atención", clientes (campañas, resultados, contenido, SEO, tareas, **Sitio web** e **Interno**), **Proyectos web** (tablero por etapas), **Generador** de páginas, leads, pedidos (también manuales), tickets, usuarios, editor de todo el sitio con vista previa y versiones, herramientas (UTM, cotizador de páginas, avisos a clientes), buscador **Ctrl+K**, "ver como cliente" y estado del sistema.
-- **`/t.js`**: script de medición para la página de un cliente (visitas, clics a WhatsApp, llamadas y formularios que llegan a su panel).
-
-## Actualizar el sitio en Cloudflare (lo que haces cada vez que recibes archivos nuevos)
-
-La base de datos **se actualiza sola**: no tienes que pegar SQL.
-
-1. Descomprime el zip. **No sustituyas tu `wrangler.toml`** (ahí está el ID real de tu base de datos); el zip de actualización ya viene sin ese archivo.
-2. En GitHub abre tu repositorio y entra a la carpeta del proyecto (`linea-frontera-v2`).
-3. **Add file → Upload files**, arrastra todo el contenido de la carpeta descomprimida (carpetas incluidas: `functions`, `public`, `scripts`, `templates`, `migrations`) y presiona **Commit changes**.
-4. Cloudflare detecta el cambio y publica solo: **Workers & Pages → tu proyecto → Deployments** (espera a que diga *Success*, 1 a 2 minutos).
-5. Abre `https://lineafrontera.stream` con recarga fuerte (Ctrl+Shift+R). Entra a `/admin.html`: la primera vez que se abre cualquier página después del deploy, la base se actualiza sola.
-6. Revisa **Admin → Ajustes → Listo para operar**: ahí ves qué falta (Stripe, avisos por correo, etc.).
-
-Si usas la terminal en lugar de la web de GitHub: copia los archivos sobre tu carpeta, `git add . && git commit -m "Actualización" && git push`.
+- **Portal del cliente** (`/dashboard.html`): KPIs, campañas, contenido por aprobar, SEO local, paquete y pagos, tickets de soporte. Se actualiza solo cada 30 s.
+- **Admin** (`/admin.html`): resumen del negocio, clientes (editor de campañas, resultados diarios, contenido, SEO, tareas), leads en kanban, pedidos, tickets, usuarios, **editor de todo el sitio con vista previa en vivo y versiones**, herramientas y registro de actividad.
 
 ## Publicar en 6 pasos
 
@@ -49,9 +34,7 @@ Con Stripe, al pagar el paquete se activa solo en la cuenta del cliente. Si pref
 |---|---|
 | `TURNSTILE_SITEKEY` y `TURNSTILE_SECRET` | Captcha de Cloudflare en registro, login y formulario |
 | `NOTIFY_WEBHOOK` | Aviso de cada lead nuevo a Discord, Slack o Zapier |
-| `RESEND_API_KEY`, `NOTIFY_EMAIL`, `RESEND_FROM` | Correo cuando llega un lead, un mensaje del sitio de un cliente o una solicitud de cambio |
-
-Guarda las llaves y secretos como **Secret** (no como Variable de texto). En Admin → Ajustes hay un botón para enviar un aviso de prueba.
+| `RESEND_API_KEY`, `NOTIFY_EMAIL`, `RESEND_FROM` | Correo cuando llega un lead |
 
 Google Analytics 4 y Meta Pixel se pegan desde Admin → Sitio → SEO y analítica (sin tocar código).
 
@@ -64,24 +47,12 @@ Google Analytics 4 y Meta Pixel se pegan desde Admin → Sitio → SEO y analít
 - **Cambiar textos, precios, colores o el orden de secciones**: Sitio. La vista previa se actualiza al escribir y "Publicar cambios" lo manda al sitio. Cada publicación queda en Versiones.
 - **Resultados diarios**: en el cliente → Resultados diarios puedes pegar filas desde Excel (fecha, gasto, leads, ventas, ingresos).
 
-## Vender y operar páginas web
-
-1. **Venta**: el cliente elige "Página Web" en el sitio, se registra y paga (Stripe o transferencia por WhatsApp). Al marcarse pagado se crea su proyecto web y ve el panel de página web.
-2. **Proyecto**: Admin → Proyectos web. Arrastra la tarjeta entre etapas (Brief → Diseño → Desarrollo → Revisión → Publicado); el cliente ve cada cambio en su historial.
-3. **Información del cliente**: él llena su brief en el portal; tú lo ves en la ficha → Sitio web.
-4. **Construir la página**: en esa pestaña pulsa "Autollenar desde el brief", ajusta textos y colores y usa **Vista previa** o **Descargar index.html**. Súbelo a un proyecto de Cloudflare Pages del cliente (Upload assets) y conecta su dominio. El archivo ya incluye el código de medición y el formulario conectado al panel del cliente.
-5. **Página que no hiciste tú**: dale el código de medición (pestaña Sitio web → "Código de medición", o en su portal → Visitas) para pegar en su `<head>`. Los formularios con el atributo `data-lf` envían sus mensajes al panel.
-6. **Cambios**: el cliente los pide desde su panel (2 rondas incluidas, editable por cliente); tú respondes y cambias el estado desde su ficha.
-7. **Mantenimiento mensual** ($490): lo activa el cliente desde Mi paquete o tú desde la ficha; cuenta en tu ingreso mensual recurrente.
-
 ## Probar en tu computadora
 
 ```
 node scripts/bake.mjs        # genera public/index.html
 node scripts/dev-server.mjs  # http://localhost:8788  (base SQLite en memoria; token admin: dev-setup-token)
-node scripts/test-api.mjs    # 90+ pruebas de la API
-node scripts/test-migrate.mjs # prueba que una base vieja se actualiza sola
-python3 scripts/e2e.py       # recorrido completo en navegador (requiere Playwright)
+node scripts/test-api.mjs    # 50+ pruebas de la API
 ```
 
 Si publicas solo la carpeta `public` en un hosting estático sin Functions (por ejemplo GitHub Pages), el sitio entra en **modo demo**: guarda todo en el navegador y muestra un aviso (la primera cuenta que crees es admin). Sirve para enseñarlo, no para operar.
@@ -94,6 +65,5 @@ Contraseñas con PBKDF2-SHA256, sesiones en cookie HttpOnly/Secure con token gua
 
 - Revisa los textos de **aviso de privacidad y términos** con un abogado y agrega tu domicilio.
 - Los **testimonios** están vacíos a propósito: en Sitio → Confianza agrégalos cuando tengas reales (si no tienen texto, no se muestran).
-- Confirma si tus precios incluyen IVA y ajusta la nota de paquetes. Los $5,900 de la página web están publicados como precio final, con nota de que la factura agrega IVA; cámbialo en Sitio → Paquetes.
-- Ajusta el texto de entrega (7 días hábiles) y lo que incluye el hosting del primer año si no coincide con tu operación.
+- Confirma si tus precios incluyen IVA y ajusta la nota de paquetes.
 - Las cifras del panel de ejemplo en la portada son demostrativas y están etiquetadas como tal.

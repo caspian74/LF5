@@ -1,6 +1,5 @@
 import { json, fail, readJson } from './util.js';
 import { currentUser, csrfOk } from './auth.js';
-import { ensureSchema } from './schema.js';
 
 const table = [];
 export function add(method, pattern, auth, handler) {
@@ -26,8 +25,7 @@ export async function dispatch(context) {
   if (!match) return pathMatched ? fail(405, 'method_not_allowed') : fail(404, 'not_found');
   const { r, params } = match;
   try {
-    if (r.auth !== 'webhook' && r.auth !== 'ingest' && !csrfOk(req)) return fail(403, 'csrf');
-    await ensureSchema(env);
+    if (r.auth !== 'webhook' && !csrfOk(req)) return fail(403, 'csrf');
     let user = null;
     if (r.auth === 'user' || r.auth === 'admin' || r.auth === 'optional') {
       user = await currentUser(env, req);

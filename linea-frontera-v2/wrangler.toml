@@ -1,4 +1,4 @@
-name = "lf5"
+name = "linea-frontera"
 compatibility_date = "2026-01-01"
 pages_build_output_dir = "public"
 
@@ -7,4 +7,4 @@ pages_build_output_dir = "public"
 [[d1_databases]]
 binding = "DB"
 database_name = "linea-frontera-db"
-database_id = "1366f892-e768-4248-93f9-ef10bce38b3b"
+database_id = "PEGA_AQUI_EL_ID"

@@ -58,17 +58,6 @@
       }).join('') + '</div></div></section>';
   };
 
-  R.web = function (c) {
-    var w = c.web, sitio = S.packageOf(c, 'sitio'), price = sitio ? S.money(sitio.price) : '';
-    return '<section class="sec web-sec" id="paginas-web"><div class="wrap web-grid">' +
-      '<div class="web-copy">' + head('Páginas web', w.title, w.sub) +
-      '<ul class="web-points">' + w.points.map(function (pt, i) { return '<li' + rv(i + 1) + '><span class="svc-ic">' + icon('check') + '</span><div><h3>' + e(pt.t) + '</h3><p>' + e(pt.d) + '</p></div></li>'; }).join('') + '</ul>' +
-      '<div class="cta-row"' + rv(4) + '><a class="btn btn-primary" href="' + e(S.safeUrl(w.ctaLink) || '#paquetes') + '" data-track="cta_clicked" data-where="web_cta"><span>' + e(w.cta) + (price ? ' · ' + price : '') + '</span>' + icon('arrow') + '</a></div></div>' +
-      '<div class="browser"' + rv(2) + ' aria-hidden="true"><div class="browser-bar"><i></i><i></i><i></i><span>tunegocio.mx</span></div>' +
-      '<div class="browser-body"><div class="b-hero"><span class="b-pill"></span><b></b><b class="s"></b><span class="b-btn"></span></div>' +
-      '<div class="b-cards"><span></span><span></span><span></span></div><div class="b-wa">WhatsApp</div></div></div></div></section>';
-  };
-
   R.process = function (c) {
     var p = c.process;
     return '<section class="sec" id="proceso">' + head('Proceso', p.title) +
@@ -102,18 +91,14 @@
   R.packages = function (c) {
     var p = c.packages;
     return '<section class="sec" id="paquetes">' + head('Paquetes', p.title, p.sub, true) +
-      '<div class="grid pkgs">' + p.items.map(function (pk, i) {
-        var one = pk.kind === 'unico';
-        return '<article class="card pkg' + (pk.featured ? ' featured' : '') + (one ? ' unico' : '') + '"' + rv(i + 1) + ' data-pkg-card="' + e(pk.id) + '">' +
+      '<div class="grid g3 pkgs">' + p.items.map(function (pk, i) {
+        return '<article class="card pkg' + (pk.featured ? ' featured' : '') + '"' + rv(i + 1) + ' data-pkg-card="' + e(pk.id) + '">' +
           (pk.featured ? '<span class="hanko" aria-hidden="true">推し</span>' : '') +
           (pk.badge ? '<span class="badge">' + e(pk.badge) + '</span>' : '') +
           '<h3>' + e(pk.name) + '</h3><p class="tagline">' + e(pk.tagline) + '</p>' +
-          '<p class="price"><span class="amt">' + S.money(pk.price) + '</span><span class="per"> MXN ' + (one ? 'pago único' : '/ mes') + '</span></p>' +
-          (one && pk.priceNote ? '<p class="price-note">' + e(pk.priceNote) + '</p>' : '') +
+          '<p class="price"><span class="amt">' + S.money(pk.price) + '</span><span class="per"> MXN / mes</span></p>' +
           '<ul class="ticks">' + pk.features.map(function (f) { return '<li>' + icon('check') + '<span>' + e(f) + '</span></li>'; }).join('') + '</ul>' +
-          (one && pk.maint ? '<p class="maint">' + icon('plus') + '<span>Mantenimiento opcional: <b>' + S.money(pk.maint) + '/mes</b> (cambios, respaldos y soporte)</span></p>' : '') +
-          (one && pk.delivery ? '<p class="delivery">' + e(pk.delivery) + '</p>' : '') +
-          '<button class="btn ' + (pk.featured || one ? 'btn-primary' : 'btn-ghost') + ' block" type="button" data-buy="' + e(pk.id) + '"><span>' + (one ? 'Quiero mi página' : 'Contratar ' + e(pk.name)) + '</span>' + icon('arrow') + '</button>' +
+          '<button class="btn ' + (pk.featured ? 'btn-primary' : 'btn-ghost') + ' block" type="button" data-buy="' + e(pk.id) + '"><span>Contratar ' + e(pk.name) + '</span>' + icon('arrow') + '</button>' +
           '<a class="mini-link" href="' + e(S.waLink(c.brand.whatsapp, 'Hola, me interesa el paquete ' + pk.name + ' de Línea Frontera.')) + '" target="_blank" rel="noopener" data-track="cta_clicked" data-where="paquete_' + e(pk.id) + '">Prefiero hablarlo primero</a>' +
           '</article>';
       }).join('') + '</div>' +
@@ -122,7 +107,7 @@
   };
 
   R.calculator = function (c) {
-    var k = c.calculator, def = c.packages.items.filter(function (p) { return p.featured && p.kind !== 'unico'; })[0] || c.packages.items.filter(function (p) { return p.kind !== 'unico'; })[0] || { price: 9900 };
+    var k = c.calculator, def = c.packages.items.filter(function (p) { return p.featured; })[0] || c.packages.items[0] || { price: 9900 };
     function f(id, label, val, step, suffix) {
       return '<label class="fld"><span>' + label + '</span><div class="num-in"><input id="' + id + '" type="number" inputmode="decimal" min="0" step="' + step + '" value="' + val + '">' + (suffix ? '<i>' + suffix + '</i>' : '') + '</div></label>';
     }
@@ -183,11 +168,11 @@
 
   /* ---------- piezas fijas ---------- */
   function sunDisc() {
-    return '<svg class="sun" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="sunGrad" x1=".1" y1=".05" x2=".9" y2=".95"><stop offset="0" stop-color="var(--sun)"/><stop offset=".45" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient><radialGradient id="sg" cx=".3" cy=".25"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="100" r="92" fill="url(#sunGrad)"/><circle cx="100" cy="100" r="92" fill="url(#sg)"/></svg>';
+    return '<svg class="sun" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" fill="var(--accent)"/><circle cx="100" cy="100" r="92" fill="url(#sg)"/><defs><radialGradient id="sg" cx=".3" cy=".25"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs></svg>';
   }
 
   function header(c) {
-    var links = [['#servicios', 'Servicios'], ['#paginas-web', 'Páginas web'], ['#proceso', 'Proceso'], ['#paquetes', 'Paquetes'], ['#calculadora', 'Calculadora'], ['#faq', 'Preguntas']];
+    var links = [['#servicios', 'Servicios'], ['#proceso', 'Proceso'], ['#paquetes', 'Paquetes'], ['#calculadora', 'Calculadora'], ['#faq', 'Preguntas']];
     return '<a class="skip" href="#main">Saltar al contenido</a>' +
       (c.announce.enabled && c.announce.text ? '<div class="announce"><span>' + e(c.announce.text) + '</span>' + (c.announce.link ? ' <a href="' + e(S.safeUrl(c.announce.link)) + '">' + e(c.announce.linkText) + '</a>' : '') + '</div>' : '') +
       '<header class="top" id="top"><div class="top-in"><a class="logo" href="/" aria-label="' + e(c.brand.name) + ', inicio"><span class="logo-mark" aria-hidden="true"><i></i></span><span>' + e(c.brand.name) + '</span></a>' +
