@@ -2,9 +2,10 @@
 (function (g) {
   'use strict';
 
-  var SECTION_IDS = ['problem', 'services', 'process', 'demo', 'packages', 'calculator', 'audience', 'proof', 'faq', 'contact', 'cta'];
+  var SECTION_IDS = ['problem', 'services', 'web', 'process', 'demo', 'packages', 'calculator', 'audience', 'proof', 'faq', 'contact', 'cta'];
 
   var DEFAULTS = {
+    v: 2,
     brand: {
       name: 'Línea Frontera',
       tagline: 'Marketing chill para negocios de Tijuana',
@@ -16,10 +17,10 @@
       facebook: '',
       tiktok: ''
     },
-    theme: { accent: '#E34A3D', accent2: '#D9AE62', accent3: '#92969B', sun: '#D9AE62', sakura: '#DCD6CA', ink: '#090909', paper: '#F4F0E8' },
+    theme: { accent: '#FF3B5C', accent2: '#6C4DFF', accent3: '#3DDBB0', sun: '#FFC93C', sakura: '#FF8FB1', ink: '#17112E', paper: '#FFF8F0' },
     seo: {
       title: 'Línea Frontera · Marketing para negocios de Tijuana',
-      description: 'Anuncios, contenido y SEO local para negocios de Tijuana. Paquetes mensuales desde $4,900 MXN con panel de resultados. Pide tu diagnóstico gratis.',
+      description: 'Páginas web desde $5,900 MXN (pago único) y marketing mensual desde $4,900 para negocios de Tijuana: anuncios, contenido, SEO local y panel de resultados. Pide tu diagnóstico gratis.',
       ga4: '',
       metaPixel: ''
     },
@@ -33,7 +34,7 @@
       cta2: 'Ver paquetes',
       note: 'Sin contrato forzoso. Tu inversión en anuncios se paga directo a Meta y Google.'
     },
-    ticker: ['Anuncios en Meta', 'Google Business', 'Reels y TikTok', 'SEO local', 'WhatsApp que vende', 'Panel de resultados', 'Páginas de aterrizaje', 'Reseñas'],
+    ticker: ['Anuncios en Meta', 'Google Business', 'Reels y TikTok', 'SEO local', 'WhatsApp que vende', 'Páginas web', 'Panel de resultados', 'Reseñas'],
     problem: {
       title: 'Si algo de esto te suena, vamos a trabajar bien juntos',
       items: [
@@ -51,7 +52,7 @@
         { icon: 'pin', t: 'SEO local y Google Business', d: 'Ficha optimizada, reseñas, citas y páginas por servicio para que aparezcas cuando te buscan cerca.' },
         { icon: 'chat', t: 'WhatsApp que cierra ventas', d: 'Mensajes de bienvenida, respuestas rápidas y seguimiento para que ningún prospecto se quede esperando.' },
         { icon: 'chart', t: 'Panel de KPIs en tiempo real', d: 'Leads, costo por lead, ventas y retorno en un panel claro. Lo revisas cuando quieras.' },
-        { icon: 'window', t: 'Páginas de aterrizaje', d: 'Una página rápida y simple para cada campaña, medida con eventos para saber qué funciona.' }
+        { icon: 'window', t: 'Páginas web que convierten', d: 'Una página rápida, hecha para celular, con WhatsApp y formulario conectados a tu panel. La medimos para saber qué funciona.' }
       ]
     },
     process: {
@@ -67,21 +68,35 @@
       title: 'Así se ve tu panel de resultados',
       sub: 'Cada cliente tiene su cuenta con campañas, contenido por aprobar, posiciones en Google y tickets de soporte. Los números de abajo son un ejemplo para mostrar el panel.'
     },
+    web: {
+      title: 'Una página web que trabaja por ti desde la primera semana',
+      sub: 'Una página clara, rápida y hecha para celular. Pensada para que la gente te encuentre, confíe en ti y te escriba por WhatsApp.',
+      points: [
+        { t: 'Hecha para que te escriban', d: 'Botón de WhatsApp siempre visible y un formulario cuyos mensajes llegan directo a tu panel.' },
+        { t: 'Rápida y lista para Google', d: 'Carga rápido en celular y sale con lo básico de SEO local para que te encuentren en tu zona.' },
+        { t: 'Tuya, sin amarres', d: 'El dominio queda a tu nombre. Tienes un panel con visitas, mensajes recibidos y solicitudes de cambio.' }
+      ],
+      cta: 'Ver el paquete de página web',
+      ctaLink: '#paquetes'
+    },
     packages: {
-      title: 'Paquetes mensuales, precios claros',
-      sub: 'Precios en pesos mexicanos por mes. La inversión en anuncios se paga aparte, directo a Meta y Google, y tú controlas el monto.',
-      note: 'Sin plazo forzoso: puedes pausar cuando lo necesites con 30 días de aviso.',
+      title: 'Paquetes claros, en pesos mexicanos',
+      sub: 'Elige una página web con pago único o un plan mensual de marketing. La inversión en anuncios se paga aparte, directo a Meta y Google, y tú controlas el monto.',
+      note: 'Los planes mensuales no tienen plazo forzoso: puedes pausar con 30 días de aviso. La página web se paga una sola vez.',
       items: [
-        { id: 'arranque', name: 'Arranque', tagline: 'Para empezar a aparecer y recibir mensajes', price: 4900, featured: false, badge: '', stripePriceId: '', paymentLink: '',
+        { id: 'sitio', name: 'Página Web', tagline: 'Tu negocio en Google y en WhatsApp, con una página que carga rápido', price: 5900, kind: 'unico', featured: false, badge: 'Pago único', stripePriceId: '', paymentLink: '',
+          maint: 490, maintStripePriceId: '', delivery: 'Entrega en 7 días hábiles desde que recibimos tu material.', priceNote: 'Precio final. Si necesitas factura, se agrega IVA.',
+          features: ['Página de una sola pantalla con hasta 6 secciones', 'Diseño con tu marca, hecho para celular', 'Botón de WhatsApp y formulario conectado a tu panel', 'SEO local básico y datos listos para Google', 'Hosting y certificado SSL incluidos el primer año', 'Panel con visitas, mensajes y solicitudes de cambio', '2 rondas de ajustes incluidas'] },
+        { id: 'arranque', name: 'Arranque', tagline: 'Para empezar a aparecer y recibir mensajes', price: 4900, kind: 'mensual', featured: false, badge: '', stripePriceId: '', paymentLink: '', maint: 0, maintStripePriceId: '', delivery: '', priceNote: '',
           features: ['Google Business optimizado', '8 piezas de contenido al mes', 'Calendario y publicación en Instagram y Facebook', '1 campaña de anuncios en Meta', 'Panel mensual con tus números', 'Soporte por WhatsApp en horario hábil'] },
-        { id: 'crecimiento', name: 'Crecimiento', tagline: 'Para crecer ventas con anuncios y SEO local', price: 9900, featured: true, badge: 'Más elegido', stripePriceId: '', paymentLink: '',
+        { id: 'crecimiento', name: 'Crecimiento', tagline: 'Para crecer ventas con anuncios y SEO local', price: 9900, kind: 'mensual', featured: true, badge: 'Recomendado', stripePriceId: '', paymentLink: '', maint: 0, maintStripePriceId: '', delivery: '', priceNote: '',
           features: ['Todo lo de Arranque', '16 piezas al mes y 1 sesión de grabación', 'SEO local: reseñas, citas y páginas por servicio', 'Campañas en Meta y Google Búsqueda', 'Seguimiento de leads a ventas por WhatsApp', 'Reunión mensual de resultados'] },
-        { id: 'dominancia', name: 'Dominancia', tagline: 'Para liderar tu zona y escalar', price: 16500, featured: false, badge: '', stripePriceId: '', paymentLink: '',
-          features: ['Todo lo de Crecimiento', '24 piezas al mes y 2 sesiones de grabación', 'Landing page para campañas', 'Reactivación de clientes por WhatsApp y email', 'Reporte semanal', 'Soporte prioritario'] }
+        { id: 'dominancia', name: 'Dominancia', tagline: 'Para liderar tu zona y escalar', price: 16500, kind: 'mensual', featured: false, badge: '', stripePriceId: '', paymentLink: '', maint: 0, maintStripePriceId: '', delivery: '', priceNote: '',
+          features: ['Todo lo de Crecimiento', '24 piezas al mes y 2 sesiones de grabación', 'Página web para campañas', 'Reactivación de clientes por WhatsApp y email', 'Reporte semanal', 'Soporte prioritario'] }
       ],
       addons: [
         { name: 'Sesión extra de grabación', price: 'Cotiza' },
-        { name: 'Landing page adicional', price: 'Cotiza' },
+        { name: 'Página adicional', price: 'Cotiza' },
         { name: 'Identidad visual', price: 'Cotiza' }
       ]
     },
@@ -112,7 +127,10 @@
       { q: '¿Me aseguran un número de ventas?', a: 'Nadie honesto puede asegurar ventas. Sí nos comprometemos a lo que controlamos: publicar, optimizar, reportar y mejorar cada mes.' },
       { q: '¿Trabajan con negocios que no son de salud?', a: 'Sí. Tenemos especialidad en salud, pero atendemos cualquier negocio local de Tijuana con clientes en la zona.' },
       { q: '¿Cómo pago?', a: 'Con tarjeta desde esta página o por transferencia. Te llega tu recibo y activamos tu cuenta con panel.' },
-      { q: '¿Puedo ver mis resultados en tiempo real?', a: 'Sí. Al comprar un paquete tienes cuenta con panel donde ves campañas, contenido, posiciones en Google y puedes abrir tickets de soporte.' }
+      { q: '¿Puedo ver mis resultados en tiempo real?', a: 'Sí. Al comprar un paquete tienes cuenta con panel donde ves campañas, contenido, posiciones en Google y puedes abrir tickets de soporte.' },
+      { q: '¿Qué incluye el paquete de página web?', a: 'Una página de una sola pantalla con hasta 6 secciones, diseñada con tu marca y lista para celular, con botón de WhatsApp, formulario conectado a tu panel y lo básico de SEO local. Incluye hosting y certificado SSL el primer año y 2 rondas de ajustes.' },
+      { q: '¿El dominio de mi página es mío?', a: 'Sí. El dominio (.com o .mx, entre $250 y $350 al año aproximadamente) se registra a tu nombre y lo pagas directo al registrador. Si algún día te vas, te entregamos los archivos de tu página.' },
+      { q: '¿Cuánto tarda mi página y qué pasa después?', a: 'Entregamos en 7 días hábiles desde que recibimos tu material. Después puedes contratar el mantenimiento opcional (hosting, cambios menores y reporte de visitas) o llevarte los archivos y publicarlos donde prefieras.' }
     ],
     contact: {
       title: 'Pide tu diagnóstico gratis',
@@ -124,7 +142,8 @@
   };
 
   var SHAPES = {
-    'proof.testimonials': { name: '', role: '', text: '' }
+    'proof.testimonials': { name: '', role: '', text: '' },
+    'packages.items': { id: '', name: '', tagline: '', price: 0, kind: 'mensual', featured: false, badge: '', stripePriceId: '', paymentLink: '', maint: 0, maintStripePriceId: '', delivery: '', priceNote: '', features: [''] }
   };
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -172,10 +191,24 @@
     if (/(link|url|href|paymentLink)$/i.test(key)) return safeUrl(s);
     if (key === 'whatsapp') return s.replace(/[^\d+ ]/g, '').slice(0, 20);
     if (key === 'id') return s.replace(/[^a-z0-9_-]/gi, '').slice(0, 40);
-    return s.slice(0, key === 'a' || key === 'd' || key === 'sub' || key === 'description' || key === 'text' ? 1500 : 300);
+    if (key === 'kind' && path === 'packages.items.kind') return s === 'unico' ? 'unico' : 'mensual';
+    return s.slice(0, key === 'a' || key === 'd' || key === 'sub' || key === 'description' || key === 'text' || key === 'delivery' ? 1500 : 300);
+  }
+
+  /* Contenido guardado con una versión anterior: agrega el paquete y la sección de página web sin perder lo editado. */
+  function upgradeContent(c) {
+    if (!c || typeof c !== 'object') return {};
+    var s = clone(c);
+    if (!(Number(s.v) >= 2)) {
+      if (s.packages && Array.isArray(s.packages.items) && !s.packages.items.some(function (p) { return p && p.id === 'sitio'; })) s.packages.items.unshift(clone(DEFAULTS.packages.items[0]));
+      if (s.sections && Array.isArray(s.sections.order) && s.sections.order.indexOf('web') < 0) { var i = s.sections.order.indexOf('services'); s.sections.order.splice(i < 0 ? 0 : i + 1, 0, 'web'); }
+      s.v = 2;
+    }
+    return s;
   }
 
   function sanitizeContent(c) {
+    c = upgradeContent(c);
     var out = sanitize(c, DEFAULTS, '');
     var seen = {}, order = [];
     (c && c.sections && Array.isArray(c.sections.order) ? c.sections.order : []).forEach(function (id) {
@@ -190,6 +223,8 @@
       ids[p.id] = 1;
       if (p.price < 0) p.price = 0;
       p.stripePriceId = /^price_[A-Za-z0-9]+$/.test(p.stripePriceId) ? p.stripePriceId : '';
+      p.maintStripePriceId = /^price_[A-Za-z0-9]+$/.test(p.maintStripePriceId) ? p.maintStripePriceId : '';
+      if (p.maint < 0) p.maint = 0;
       if (!Array.isArray(p.features)) p.features = [];
     });
     return out;
@@ -231,6 +266,18 @@
   function uid(p) { return (p || 'id') + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3); }
 
   /* ---------- datos del cliente (portal) ---------- */
+  var WEB_STAGES = [
+    { id: 'brief', t: 'Brief', d: 'Nos cuentas de tu negocio y nos mandas tu material.', pct: 10 },
+    { id: 'diseno', t: 'Diseño', d: 'Armamos el diseño de tu página con tu marca.', pct: 35 },
+    { id: 'desarrollo', t: 'Desarrollo', d: 'La construimos y conectamos WhatsApp y formulario.', pct: 60 },
+    { id: 'revision', t: 'Revisión', d: 'Tú la revisas y pides los ajustes que necesites.', pct: 85 },
+    { id: 'publicado', t: 'Publicada', d: 'Tu página ya está en línea.', pct: 100 }
+  ];
+  var WEB_STAGE_IDS = WEB_STAGES.map(function (x) { return x.id; });
+  var CHANGE_ST = ['recibida', 'en proceso', 'lista', 'rechazada'];
+  var ST3 = ['pendiente', 'en proceso', 'activo'];
+  var BRIEF_KEYS = ['about', 'services', 'audience', 'colors', 'refs', 'social', 'hours', 'address', 'whatsapp', 'slogan', 'extra'];
+
   var CLIENT_TPL = {
     plan: '',
     status: 'onboarding',
@@ -240,40 +287,152 @@
     content: [{ id: '', title: '', type: 'Reel', status: 'por aprobar', date: '', url: '' }],
     seo: { rankings: [{ kw: '', pos: 0, prev: 0 }], gbp: { views: 0, calls: 0, directions: 0, reviews: 0, rating: 0 } },
     reports: [{ title: '', url: '' }],
-    tasks: [{ id: '', title: '', done: false }]
+    tasks: [{ id: '', title: '', done: false }],
+    web: {
+      enabled: false, stage: 'brief', dueDate: '', url: '', previewUrl: '', domain: '', domainStatus: 'pendiente', domainRenew: '', ssl: 'pendiente',
+      maintenance: false, changesIncluded: 2, notifyEmail: '',
+      brief: { about: '', services: '', audience: '', colors: '', refs: '', social: '', hours: '', address: '', whatsapp: '', slogan: '', extra: '' },
+      changes: [{ id: '', title: '', detail: '', section: '', status: 'recibida', at: '', reply: '' }],
+      files: [{ id: '', title: '', url: '', by: 'cliente' }],
+      timeline: [{ id: '', text: '', at: '' }]
+    },
+    admin: {
+      notes: '', quote: 0, hours: 0, nextAction: '', nextDate: '', tags: [''],
+      site: {
+        headline: '', sub: '', cta: '', accent: '#FF3B5C', accent2: '#6C4DFF', theme: 'claro', logoText: '', about: '', hours: '', address: '', mapUrl: '', whatsapp: '', email: '', instagram: '', facebook: '', tiktok: '',
+        services: [{ t: '', d: '' }], benefits: [{ t: '', d: '' }], faq: [{ q: '', a: '' }]
+      }
+    }
   };
-  var CLIENT_SHAPES = { 'campaigns': CLIENT_TPL.campaigns[0], 'series': CLIENT_TPL.series[0], 'content': CLIENT_TPL.content[0], 'seo.rankings': CLIENT_TPL.seo.rankings[0], 'reports': CLIENT_TPL.reports[0], 'tasks': CLIENT_TPL.tasks[0] };
+  var CLIENT_SHAPES = { 'campaigns': CLIENT_TPL.campaigns[0], 'series': CLIENT_TPL.series[0], 'content': CLIENT_TPL.content[0], 'seo.rankings': CLIENT_TPL.seo.rankings[0], 'reports': CLIENT_TPL.reports[0], 'tasks': CLIENT_TPL.tasks[0],
+    'web.changes': CLIENT_TPL.web.changes[0], 'web.files': CLIENT_TPL.web.files[0], 'web.timeline': CLIENT_TPL.web.timeline[0],
+    'admin.site.services': CLIENT_TPL.admin.site.services[0], 'admin.site.benefits': CLIENT_TPL.admin.site.benefits[0], 'admin.site.faq': CLIENT_TPL.admin.site.faq[0] };
+  var CLIENT_ENUM = { 'web.stage': WEB_STAGE_IDS, 'web.domainStatus': ST3, 'web.ssl': ST3, 'web.changes.status': CHANGE_ST, 'web.files.by': ['cliente', 'equipo'], 'admin.site.theme': ['claro', 'oscuro'] };
+  var CLIENT_MAX = { series: 400, 'web.changes': 100, 'web.files': 100, 'web.timeline': 100, 'admin.site.services': 12, 'admin.site.benefits': 8, 'admin.site.faq': 12, 'admin.tags': 12 };
+  var LONG_KEYS = /^(notes|note|about|services|audience|refs|extra|detail|reply|text|headline|sub|d|a|nextAction)$/;
+  var DATE_KEYS = /^(date|dueDate|domainRenew|nextDate)$/;
 
   function sanitizeClientData(d) {
     // sanea con rutas propias para no chocar con las de contenido
     function walk(v, t, p) {
       if (Array.isArray(t)) {
         if (!Array.isArray(v)) return [];
-        var it = CLIENT_SHAPES[p] !== undefined ? CLIENT_SHAPES[p] : t[0], out = [];
-        for (var i = 0; i < v.length && i < (p === 'series' ? 400 : 200); i++) out.push(walk(v[i], it, p));
+        var it = CLIENT_SHAPES[p] !== undefined ? CLIENT_SHAPES[p] : t[0], out = [], max = CLIENT_MAX[p] || 200;
+        for (var i = 0; i < v.length && i < max; i++) out.push(walk(v[i], it, p));
         return out;
       }
       if (t && typeof t === 'object') {
         var o = {}; v = v && typeof v === 'object' ? v : {};
-        Object.keys(t).forEach(function (k) { o[k] = k in v ? walk(v[k], t[k], p ? p + '.' + k : k) : (Array.isArray(t[k]) ? [] : clone(t[k])); });
+        Object.keys(t).forEach(function (k) { var kp = p ? p + '.' + k : k; o[k] = k in v ? walk(v[k], t[k], kp) : (Array.isArray(t[k]) ? [] : (t[k] && typeof t[k] === 'object' ? walk({}, t[k], kp) : clone(t[k]))); });
         return o;
       }
       if (typeof t === 'boolean') return v === true || v === 'true';
       if (typeof t === 'number') { var n = Number(v); return isFinite(n) ? Math.max(-1e12, Math.min(1e12, n)) : 0; }
       var s = String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
       var key = p.split('.').pop();
-      if (key === 'url') return safeUrl(s);
+      if (CLIENT_ENUM[p]) return CLIENT_ENUM[p].indexOf(s) > -1 ? s : CLIENT_ENUM[p][0];
+      if (/url$/i.test(key) || key === 'mapUrl' || key === 'instagram' || key === 'facebook' || key === 'tiktok') return safeUrl(s);
       if (key === 'id') return s.replace(/[^a-z0-9_-]/gi, '').slice(0, 40);
-      if (key === 'date') return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
-      return s.slice(0, key === 'notes' || key === 'note' ? 2000 : 200);
+      if (DATE_KEYS.test(key)) return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
+      if (key === 'at') return /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(s) ? s : '';
+      if (key === 'domain') return s.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/[^a-z0-9.-]/g, '').slice(0, 100);
+      if (key === 'email' || key === 'notifyEmail') { s = s.trim().slice(0, 254); return /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(s) ? s : ''; }
+      if (p.indexOf('admin.site.') === 0 && /^(accent|accent2)$/.test(key)) return HEX.test(s) ? s : t;
+      if (key === 'whatsapp') return s.replace(/[^\d+ ]/g, '').slice(0, 20);
+      return s.slice(0, LONG_KEYS.test(key) ? 1500 : 200);
     }
     var out = walk(d, CLIENT_TPL, '');
     out.campaigns.forEach(function (c) { if (!c.id) c.id = uid('c'); });
     out.content.forEach(function (c) { if (!c.id) c.id = uid('k'); });
     out.tasks.forEach(function (c) { if (!c.id) c.id = uid('t'); });
+    out.web.changes.forEach(function (c) { if (!c.id) c.id = uid('w'); });
+    out.web.files.forEach(function (c) { if (!c.id) c.id = uid('f'); });
+    out.web.timeline.forEach(function (c) { if (!c.id) c.id = uid('l'); });
+    out.admin.tags = out.admin.tags.filter(Boolean);
     return out;
   }
   function emptyClientData() { return sanitizeClientData({}); }
+
+  /* ---------- proyecto web: operaciones puras (las usan el servidor y el modo demo) ---------- */
+  function nowIso() { return new Date().toISOString(); }
+  function webStage(web) { var i = WEB_STAGE_IDS.indexOf(web && web.stage); return WEB_STAGES[i < 0 ? 0 : i]; }
+  function briefDone(web) {
+    var b = (web && web.brief) || {}, n = 0;
+    BRIEF_KEYS.forEach(function (k) { if (String(b[k] || '').trim()) n++; });
+    return { filled: n, total: BRIEF_KEYS.length, pct: Math.round(n / BRIEF_KEYS.length * 100) };
+  }
+  function webPendingChanges(data) { return ((data.web && data.web.changes) || []).filter(function (c) { return c.status === 'recibida' || c.status === 'en proceso'; }).length; }
+  function webActivate(data, text) {
+    var d = sanitizeClientData(data);
+    if (!d.web.enabled) { d.web.enabled = true; d.web.timeline.unshift({ id: uid('l'), text: text || 'Proyecto de página web iniciado.', at: nowIso() }); }
+    return d;
+  }
+  function webSetBrief(data, brief) {
+    var d = sanitizeClientData(data); brief = brief && typeof brief === 'object' ? brief : {};
+    BRIEF_KEYS.forEach(function (k) { if (k in brief) d.web.brief[k] = brief[k]; });
+    return sanitizeClientData(d);
+  }
+  function webAddChange(data, o) {
+    var d = sanitizeClientData(data), title = String((o && o.title) || '').trim();
+    if (!title) return d;
+    d.web.changes.unshift({ id: uid('w'), title: title, detail: (o && o.detail) || '', section: (o && o.section) || '', status: 'recibida', at: nowIso(), reply: '' });
+    d.web.timeline.unshift({ id: uid('l'), text: 'Solicitud de cambio: ' + title.slice(0, 80), at: nowIso() });
+    return sanitizeClientData(d);
+  }
+  function webAddFile(data, o, by) {
+    var d = sanitizeClientData(data), url = safeUrl(o && o.url), title = String((o && o.title) || '').trim();
+    if (!url || !title) return d;
+    d.web.files.unshift({ id: uid('f'), title: title, url: url, by: by === 'equipo' ? 'equipo' : 'cliente' });
+    return sanitizeClientData(d);
+  }
+  function webRemoveFile(data, id, by) {
+    var d = sanitizeClientData(data);
+    d.web.files = d.web.files.filter(function (f) { return !(f.id === id && (by === 'equipo' || f.by === 'cliente')); });
+    return d;
+  }
+  function webSetStage(data, stage, text) {
+    var d = sanitizeClientData(data);
+    if (WEB_STAGE_IDS.indexOf(stage) < 0 || d.web.stage === stage) return d;
+    d.web.stage = stage;
+    d.web.timeline.unshift({ id: uid('l'), text: text || ('Tu proyecto pasó a: ' + webStage(d.web).t), at: nowIso() });
+    return sanitizeClientData(d);
+  }
+
+  /* Un cliente es de página web si el proyecto está activo; de marketing si tiene paquete mensual o no tiene proyecto web. */
+  function packageOf(content, id) { return (content && content.packages && content.packages.items || []).filter(function (p) { return p.id === id; })[0] || null; }
+  function clientKinds(content, client) {
+    var data = client.data || {}, pk = packageOf(content, client.plan), web = !!(data.web && data.web.enabled);
+    var mkt = !!(pk && pk.kind === 'mensual') || (!web);
+    return { web: web, mkt: mkt };
+  }
+  function monthlyValue(content, client) {
+    var pk = packageOf(content, client.plan), v = 0, data = client.data || {};
+    if (pk && pk.kind === 'mensual') v += pk.price;
+    var web = packageOf(content, 'sitio');
+    if (data.web && data.web.enabled && data.web.maintenance && web) v += web.maint || 0;
+    return v;
+  }
+
+  function exampleWeb() {
+    var t0 = Date.now(), iso = function (d) { return new Date(t0 - d * 864e5).toISOString(); };
+    return {
+      enabled: true, stage: 'revision', dueDate: new Date(t0 + 3 * 864e5).toISOString().slice(0, 10), url: '', previewUrl: 'https://ejemplo.pages.dev', domain: 'clinicasol.mx', domainStatus: 'en proceso', domainRenew: '', ssl: 'pendiente', maintenance: false, changesIncluded: 2, notifyEmail: '',
+      brief: { about: 'Clínica dental familiar en Zona Río con 10 años de experiencia.', services: 'Limpieza dental\nOrtodoncia\nBlanqueamiento', audience: 'Familias y jóvenes de Tijuana', colors: 'Azul y blanco', refs: '', social: '@clinicasol', hours: 'Lun a Vie 9:00 a 19:00', address: 'Blvd. Sánchez Taboada 1234, Zona Río', whatsapp: '6641234567', slogan: 'Sonríe sin miedo', extra: '' },
+      changes: [{ id: 'w1', title: 'Cambiar la foto del inicio', detail: 'Usar la foto del equipo completo.', section: 'Inicio', status: 'en proceso', at: iso(1), reply: 'Ya la estamos acomodando.' }],
+      files: [{ id: 'f1', title: 'Logo y fotos (Drive)', url: 'https://drive.google.com/', by: 'cliente' }],
+      timeline: [{ id: 'l3', text: 'Tu proyecto pasó a: Revisión', at: iso(1) }, { id: 'l2', text: 'Tu proyecto pasó a: Desarrollo', at: iso(3) }, { id: 'l1', text: 'Pago confirmado. Proyecto de página web iniciado.', at: iso(6) }]
+    };
+  }
+
+  /* estadísticas de ejemplo (modo demo y vistas de muestra) */
+  function exampleSiteStats(days) {
+    var out = [], base = Date.now(); days = days || 30;
+    for (var i = days - 1; i >= 0; i--) {
+      var d = new Date(base - i * 864e5), w = 1 + Math.sin(i / 2.2) * 0.3 + (days - i) / (days * 2), view = Math.round(34 * w);
+      out.push({ d: d.toISOString().slice(0, 10), view: view, wa: Math.round(view * 0.09), call: Math.round(view * 0.03), form: Math.round(view * 0.04) });
+    }
+    return out;
+  }
 
   function exampleClientData() {
     var series = [], base = new Date(Date.UTC(2026, 8, 1));
@@ -326,6 +485,9 @@
     sanitizeContent: sanitizeContent, resolveContent: resolveContent, contentHash: contentHash,
     money: money, num: num, pct: pct, normalizeWhatsApp: normalizeWhatsApp, waLink: waLink, uid: uid,
     sanitizeClientData: sanitizeClientData, emptyClientData: emptyClientData, exampleClientData: exampleClientData,
+    WEB_STAGES: WEB_STAGES, CHANGE_ST: CHANGE_ST, ST3: ST3, BRIEF_KEYS: BRIEF_KEYS, webStage: webStage, briefDone: briefDone, webPendingChanges: webPendingChanges, webActivate: webActivate,
+    webSetBrief: webSetBrief, webAddChange: webAddChange, webAddFile: webAddFile, webRemoveFile: webRemoveFile, webSetStage: webSetStage, packageOf: packageOf, clientKinds: clientKinds, monthlyValue: monthlyValue,
+    exampleWeb: exampleWeb, exampleSiteStats: exampleSiteStats,
     totals: totals, toCSV: toCSV
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = g.LF.shared;

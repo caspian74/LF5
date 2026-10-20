@@ -1,16 +1,27 @@
 /* Portal del cliente */
 (function (g) {
   'use strict';
-  var S = g.LF.shared, api = g.LF.api, ui = g.LF.ui, K = g.LF.kit, e = S.esc;
+  var S = g.LF.shared, realApi = g.LF.api, ui = g.LF.ui, K = g.LF.kit, e = S.esc;
   var root = document.getElementById('root');
+  var RO = (new URLSearchParams(location.search).get('as') || '').replace(/\D/g, '');   // el admin mira el panel de un cliente (solo lectura)
+  var api = !RO ? realApi : Object.assign({}, realApi, {
+    get: function (p) { return realApi.get(p === '/portal' ? '/admin/clients/' + RO + '/portal' : p); },
+    post: ro, put: ro, patch: ro, del: ro
+  });
+  function ro() { ui.toast('Vista de solo lectura'); return Promise.resolve({ ok: false, status: 0, data: { ok: false, error: 'readonly' } }); }
   var st = { d: null, view: 'resumen', range: 14, content: null, ticket: null, loadedAt: 0 };
-  var NAV = [['resumen', 'Resumen', 'home'], ['campanas', 'Campañas', 'megaphone'], ['contenido', 'Contenido', 'film'], ['seo', 'SEO local', 'pin'], ['pagos', 'Mi paquete', 'card'], ['soporte', 'Soporte', 'help'], ['cuenta', 'Cuenta', 'user']];
+  var NAV_MKT = [['resumen', 'Resumen', 'home'], ['campanas', 'Campañas', 'megaphone'], ['contenido', 'Contenido', 'film'], ['seo', 'SEO local', 'pin']];
+  var NAV_WEB = [['sitio', 'Mi página web', 'window'], ['visitas', 'Visitas y mensajes', 'chart'], ['cambios', 'Cambios', 'wand'], ['brief', 'Mi información', 'file']];
+  var NAV_END = [['pagos', 'Mi paquete', 'card'], ['soporte', 'Soporte', 'help'], ['cuenta', 'Cuenta', 'user']];
+  function kinds() { var c = st.d && st.d.client; return c && c.kinds ? c.kinds : { web: false, mkt: true }; }
+  function NAV() { var k = kinds(); return (k.mkt || !k.web ? NAV_MKT : []).concat(k.web ? NAV_WEB : [], NAV_END); }
+  function defaultView() { return NAV()[0][0]; }
 
   function load(silent) {
     return api.get('/portal').then(function (r) {
       if (r.status === 401) { location.replace('/auth.html?next=' + encodeURIComponent('/dashboard.html')); return null; }
       if (!r.ok) { if (!silent) root.innerHTML = '<div class="center-page"><div class="auth-card"><h1>No pudimos cargar tu panel</h1><p class="muted">' + e(api.errText(r)) + '</p><button class="btn btn-primary" onclick="location.reload()"><span>Reintentar</span></button></div></div>'; return null; }
-      var changed = st.d && JSON.stringify(st.d.client) !== JSON.stringify(r.data.client);
+      var changed = st.d && (JSON.stringify(st.d.client) !== JSON.stringify(r.data.client) || JSON.stringify(st.d.announcements) !== JSON.stringify(r.data.announcements));
       st.d = r.data; st.loadedAt = Date.now();
       return changed ? 'changed' : 'ok';
     });
@@ -23,7 +34,7 @@
   function sum(rows) { var t = { spend: 0, leads: 0, sales: 0, revenue: 0 }; rows.forEach(function (r) { t.spend += r.spend; t.leads += r.leads; t.sales += r.sales; t.revenue += r.revenue; }); t.cpl = t.leads ? t.spend / t.leads : 0; t.roas = t.spend ? t.revenue / t.spend : 0; return t; }
 
   /* ---------- vistas ---------- */
-  var V = {};
+  var V = {}, A = {};   // A: pasos posteriores al pintar (cargas diferidas)
   V.resumen = function () {
     var all = windowed(0), n = st.range, cur = n ? all.slice(-n) : all, prev = n ? all.slice(-2 * n, -n) : [], t = sum(cur), p = sum(prev), data = cd();
     var pending = data.content.filter(function (c) { return c.status === 'por aprobar'; }).length, tasks = data.tasks.filter(function (x) { return !x.done; });
@@ -34,7 +45,7 @@
     return head('Hola, ' + e((st.d.user.name || '').split(' ')[0]), (hasPlan() ? 'Paquete ' + e(planName()) + ' · ' : '') + 'así va tu marketing', rangeSel) + banner +
       '<div class="grid-a ga4">' + K.stat('Mensajes y leads', S.num(t.leads), K.delta(t.leads, p.leads), 'var(--accent)') + K.stat('Costo por lead', S.money(t.cpl), K.delta(t.cpl, p.cpl, true), 'var(--accent2)') +
       K.stat('Ventas cerradas', S.num(t.sales), K.delta(t.sales, p.sales), 'var(--accent3)') + K.stat('Retorno sobre anuncios', t.roas ? t.roas.toFixed(1) + 'x' : '—', t.revenue ? 'Ingresos ' + S.money(t.revenue) : '', 'var(--sun)') + '</div>' +
-      '<div class="grid-a ga-1-2" style="margin-top:16px"><div class="panel"><h2>Leads y ventas por día</h2>' + K.line(cur, [{ key: 'leads', label: 'Leads', color: '#E34A3D' }, { key: 'sales', label: 'Ventas', color: '#92969B' }], { label: 'Leads y ventas por día' }) + '</div>' +
+      '<div class="grid-a ga-1-2" style="margin-top:16px"><div class="panel"><h2>Leads y ventas por día</h2>' + K.line(cur, [{ key: 'leads', label: 'Leads', color: '#FF3B5C' }, { key: 'sales', label: 'Ventas', color: '#3DDBB0' }], { label: 'Leads y ventas por día' }) + '</div>' +
       '<div class="panel"><h2>Leads por canal</h2>' + K.donut(Object.keys(chans).map(function (k) { return { l: k, v: chans[k] }; })) + '<h2 style="margin-top:22px">Pendiente de ti</h2>' +
       (pending ? '<a class="item" href="#contenido"><div class="grow"><h4>' + pending + ' pieza' + (pending > 1 ? 's' : '') + ' por aprobar</h4><small>Revisa y aprueba para publicar</small></div>' + K.ic('arrow') + '</a>' : '<p class="hint">Nada por aprobar.</p>') +
       tasks.slice(0, 4).map(function (x) { return '<label class="check" style="margin-top:10px"><input type="checkbox" data-task="' + e(x.id) + '"><span>' + e(x.title) + '</span></label>'; }).join('') + '</div></div>' +
@@ -72,11 +83,13 @@
   };
 
   V.pagos = function () {
-    var c = st.d.client, pk = st.content ? st.content.packages.items : [];
+    var c = st.d.client, pk = st.content ? st.content.packages.items : [], k = kinds(), wd = c.data.web;
     var cur = hasPlan() ? '<div class="panel" style="margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div class="grow" style="flex:1"><span class="hint">Paquete actual</span><h2 style="margin:0;font-size:1.6rem">' + e(planName()) + '</h2>' + K.tag(c.status) + '</div>' + (c.billing ? '<button class="btn btn-ghost btn-sm" id="billing" type="button"><span>Administrar pago y facturas</span></button>' : '') + '</div>' : '<div class="alert" style="margin-bottom:16px">Elige tu paquete. Al pagar activamos tu cuenta y arrancamos.</div>';
-    return head('Mi paquete', 'Contratación y pagos') + cur + '<div class="grid-a ga3">' + pk.map(function (p) {
-      var mine = c.plan === p.id; return '<article class="panel" style="' + (p.featured ? 'background:var(--ink);color:var(--paper)' : '') + '"><h3>' + e(p.name) + '</h3><div style="font-family:var(--f-display);font-size:2rem;font-weight:800">' + S.money(p.price) + '<small style="font-size:.9rem;font-weight:500"> /mes</small></div><p class="hint" style="margin:8px 0 14px;' + (p.featured ? 'color:rgba(244,240,232,.7)' : '') + '">' + e(p.tagline) + '</p>' +
-        (mine ? '<span class="tag ok">Tu paquete</span>' : '<button class="btn btn-sm ' + (p.featured ? 'btn-primary' : 'btn-dark') + ' block" data-buy="' + e(p.id) + '" type="button"><span>' + (hasPlan() ? 'Cambiar a ' : 'Contratar ') + e(p.name) + '</span></button>') + '</article>';
+    var web = S.packageOf(st.content, 'sitio');
+    var maint = (k.web && web && web.maint && !wd.maintenance) ? '<div class="banner info">' + K.ic('wand') + '<span style="flex:1"><b>Mantenimiento de tu página: ' + S.money(web.maint) + '/mes.</b> Cambios, respaldos y soporte cuando los necesites.</span><button class="btn btn-sm btn-primary" data-buy="sitio" data-addon="maint" type="button"><span>Activar</span></button></div>' : (k.web && wd.maintenance ? '<div class="banner ok">' + K.ic('check') + '<span>Tu mantenimiento mensual está activo.</span></div>' : '');
+    return head('Mi paquete', 'Contratación y pagos') + cur + maint + '<div class="grid-a ga4">' + pk.map(function (p) {
+      var mine = c.plan === p.id, one = p.kind === 'unico'; return '<article class="panel" style="' + (p.featured ? 'background:var(--ink);color:#fff' : '') + '"><h3>' + e(p.name) + '</h3><div style="font-family:var(--f-display);font-size:2rem;font-weight:800">' + S.money(p.price) + '<small style="font-size:.9rem;font-weight:500"> ' + (one ? 'pago único' : '/mes') + '</small></div><p class="hint" style="margin:8px 0 14px;' + (p.featured ? 'color:rgba(255,255,255,.7)' : '') + '">' + e(p.tagline) + '</p>' +
+        (mine ? '<span class="tag ok">Tu paquete</span>' : '<button class="btn btn-sm ' + (p.featured ? 'btn-primary' : 'btn-dark') + ' block" data-buy="' + e(p.id) + '" type="button"><span>' + (one ? 'Contratar' : hasPlan() ? 'Cambiar a ' + e(p.name) : 'Contratar ' + e(p.name)) + '</span></button>') + '</article>';
     }).join('') + '</div>' +
       '<div class="panel" style="margin-top:16px"><h2>Historial de pedidos</h2>' + (st.d.orders.length ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Paquete</th><th class="num">Monto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>' + st.d.orders.map(function (o) { return '<tr><td>' + o.id + '</td><td>' + e(o.package_name) + '</td><td class="num">' + S.money(o.amount) + '</td><td>' + K.tag(o.status) + '</td><td>' + e(ui.fmtDate(o.created_at)) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="hint">Aún no tienes pedidos.</p>') + '</div>';
   };
@@ -96,25 +109,29 @@
       '<div class="panel"><h2>Sesión</h2><button class="btn btn-ghost btn-sm" id="logout" type="button"><span>Cerrar sesión</span></button></div></div>';
   };
 
-  function head(t, sub, right) { return '<div class="bar"><div class="grow"><h1>' + t + '</h1><p class="sub">' + sub + '</p></div>' + (right || '') + '</div>'; }
+  function announcements() {
+    var list = (st.d && st.d.announcements) || [], dis = {}; try { dis = JSON.parse(localStorage.getItem('lf_ann') || '{}'); } catch (x) { /* sin almacenamiento */ }
+    return list.filter(function (a) { return !dis[a.id]; }).map(function (a) { return '<div class="banner ' + e(a.level) + '" role="status">' + K.ic('bell') + '<span class="grow" style="flex:1">' + e(a.text) + '</span><button class="link-btn" data-ann="' + e(a.id) + '" type="button" aria-label="Cerrar aviso">✕</button></div>'; }).join('');
+  }
+  function head(t, sub, right) { return announcements() + '<div class="bar"><div class="grow"><h1>' + t + '</h1><p class="sub">' + sub + '</p></div>' + (right || '') + '</div>'; }
   function empty(t, s) { return '<div class="panel"><div class="empty"><strong>' + e(t) + '</strong>' + e(s) + '</div></div>'; }
 
   /* ---------- shell ---------- */
   function shell() {
-    var nav = NAV.map(function (n) { return '<button class="nv" data-v="' + n[0] + '" ' + (st.view === n[0] ? 'aria-current="page"' : '') + ' type="button">' + K.ic(n[2]) + '<span>' + n[1] + '</span></button>'; }).join('');
-    var m = NAV.map(function (n) { return '<button data-v="' + n[0] + '" ' + (st.view === n[0] ? 'aria-current="page"' : '') + ' type="button">' + K.ic(n[2]) + '<span>' + (n[0] === 'pagos' ? 'Paquete' : n[1].split(' ')[0]) + '</span></button>'; }).join('');
-    root.innerHTML = '<div class="app"><aside class="side"><a class="logo light" href="/"><span class="logo-mark" aria-hidden="true"><i></i></span><span>Línea Frontera</span></a><nav aria-label="Panel">' + nav + '</nav><div class="spacer"></div>' +
-      (st.d.user.role === 'admin' ? '<a class="nv" href="/admin.html">' + K.ic('gear') + '<span>Ir al admin</span></a>' : '') + '<a class="nv" href="/">' + K.ic('globe') + '<span>Ver sitio</span></a><div class="who">' + e(st.d.user.email) + '</div></aside>' +
+    var nav = NAV().map(function (n) { return '<button class="nv" data-v="' + n[0] + '" ' + (st.view === n[0] ? 'aria-current="page"' : '') + ' type="button">' + K.ic(n[2]) + '<span>' + n[1] + '</span></button>'; }).join('');
+    var m = NAV().map(function (n) { return '<button data-v="' + n[0] + '" ' + (st.view === n[0] ? 'aria-current="page"' : '') + ' type="button">' + K.ic(n[2]) + '<span>' + (n[0] === 'pagos' ? 'Paquete' : n[0] === 'sitio' ? 'Mi web' : n[0] === 'visitas' ? 'Visitas' : n[0] === 'brief' ? 'Info' : n[1].split(' ')[0]) + '</span></button>'; }).join('');
+    root.innerHTML = (RO ? '<div class="ro-bar">Estás viendo el panel como lo ve tu cliente (solo lectura) <a href="/admin.html#clientes">← Volver al admin</a></div>' : '') + '<div class="app"><aside class="side"><a class="logo light" href="/"><span class="logo-mark" aria-hidden="true"><i></i></span><span>Línea Frontera</span></a><nav aria-label="Panel">' + nav + '</nav><div class="spacer"></div>' +
+      (st.d.user.role === 'admin' && !RO ? '<a class="nv" href="/admin.html">' + K.ic('gear') + '<span>Ir al admin</span></a>' : '') + '<a class="nv" href="/">' + K.ic('globe') + '<span>Ver sitio</span></a><div class="who">' + e(st.d.user.email) + '</div></aside>' +
       '<main class="main" id="main"><div class="view" id="view"></div></main><nav class="mnav" aria-label="Panel">' + m + '</nav></div>';
     paint();
   }
   function paint() {
     var v = document.getElementById('view'); if (!v) return shell();
     Array.prototype.forEach.call(document.querySelectorAll('[data-v]'), function (b) { if (b.dataset.v === st.view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    v.innerHTML = V[st.view](); K.bindCharts(v);
+    v.innerHTML = V[st.view](); K.bindCharts(v); if (A[st.view]) A[st.view]();
     if (st.view === 'soporte' && st.ticket) openTicket(st.ticket);
   }
-  function go(view) { st.view = V[view] ? view : 'resumen'; st.ticket = null; if (location.hash !== '#' + st.view) history.replaceState(null, '', '#' + st.view); var v = document.getElementById('view'); v.style.animation = 'none'; void v.offsetWidth; v.style.animation = ''; paint(); window.scrollTo(0, 0); }
+  function go(view) { st.view = V[view] ? view : defaultView(); st.ticket = null; if (location.hash !== '#' + st.view) history.replaceState(null, '', '#' + st.view); var v = document.getElementById('view'); v.style.animation = 'none'; void v.offsetWidth; v.style.animation = ''; paint(); window.scrollTo(0, 0); }
 
   function openTicket(id) {
     st.ticket = id;
@@ -129,7 +146,8 @@
   function msgBox(id, ok, t) { var m = document.getElementById(id); if (m) { m.className = 'form-msg ' + (ok ? 'ok' : 'err'); m.textContent = t; } }
   function buy(pkgId, btn) {
     btn.disabled = true;
-    api.post('/checkout', { packageId: pkgId }).then(function (r) {
+    var addon = btn.dataset && btn.dataset.addon;
+    api.post('/checkout', addon ? { packageId: pkgId, addon: addon } : { packageId: pkgId }).then(function (r) {
       btn.disabled = false;
       if (!r.ok) return ui.toast(api.errText(r));
       ui.track('checkout_started', { package: pkgId });
@@ -141,7 +159,8 @@
   }
 
   document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('[data-v],[data-appr],[data-buy],[data-tk],[data-back],#billing,#logout'); if (!t) return;
+    var t = ev.target.closest('[data-v],[data-appr],[data-buy],[data-tk],[data-back],[data-ann],#billing,#logout'); if (!t) return;
+    if (t.dataset.ann) { var dis = {}; try { dis = JSON.parse(localStorage.getItem('lf_ann') || '{}'); dis[t.dataset.ann] = 1; localStorage.setItem('lf_ann', JSON.stringify(dis)); } catch (x) { /* noop */ } return paint(); }
     if (t.dataset.v) return go(t.dataset.v);
     if (t.dataset.appr) { t.disabled = true; return api.post('/portal/content', { id: t.dataset.appr, status: t.dataset.s }).then(function (r) { if (!r.ok) ui.toast(api.errText(r)); else ui.toast(t.dataset.s === 'aprobado' ? 'Aprobado' : 'Avisamos al equipo'); return load(true).then(paint); }); }
     if (t.dataset.buy) return buy(t.dataset.buy, t);
@@ -171,10 +190,11 @@
   }
   setInterval(poll, 30000); document.addEventListener('visibilitychange', poll);
 
+  g.LF.portal = { st: st, V: V, A: A, api: api, RO: RO, head: head, empty: empty, paint: paint, go: go, load: load, kinds: kinds, msgBox: msgBox };
   api.ready().then(function () { ui.demoBanner(); return Promise.all([load(), api.get('/content')]); }).then(function (res) {
     if (!res[0]) return;
     st.content = S.resolveContent(res[1].data && res[1].data.content);
-    var h = location.hash.slice(1); if (V[h]) st.view = h;
+    var h = location.hash.slice(1); st.view = V[h] ? h : defaultView();
     shell();
     var q = new URLSearchParams(location.search); if (q.get('o')) ui.toast('Gracias. Estamos confirmando tu pago.');
   });

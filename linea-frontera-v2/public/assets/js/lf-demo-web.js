@@ -68,7 +68,7 @@
       var price = maint ? pkg.maint : pkg.price, name = maint ? pkg.name + ' · Mantenimiento mensual' : pkg.name;
       var o = { id: h.id(db), user_id: u.id, client_id: c.id, package_id: maint ? pkg.id + '-mant' : pkg.id, package_name: name, amount: Math.round(price), currency: 'MXN', status: 'pendiente', method: 'manual', created_at: h.now(), paid_at: null };
       db.orders.push(o); h.save();
-      var txt = maint ? 'Hola, quiero activar el mantenimiento mensual de mi página (' + S.money(price) + ' MXN/mes). Pedido #' + o.id + '.' : pkg.kind === 'unico' ? 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(price) + ' MXN, pago único). Pedido #' + o.id + '.' : 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(price) + ' MXN/mes). Pedido #' + o.id + '.';
+      var txt = maint ? 'Hola, quiero activar el mantenimiento mensual de mi página (' + S.money(price) + ' MXN/mes).' : pkg.kind === 'unico' ? 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(price) + ' MXN, pago único).' : 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(price) + ' MXN/mes).';
       return res(200, { ok: true, orderId: o.id, manual: true, whatsapp: S.waLink(content.brand.whatsapp, txt), package: { name: name, price: price } });
     }
     if (method === 'PATCH' && (m = /^\/admin\/orders\/(\d+)$/.exec(q)) && b.status === 'pagado') {

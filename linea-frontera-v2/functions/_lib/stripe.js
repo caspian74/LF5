@@ -1,4 +1,5 @@
 import { hex, safeEqual, now } from './util.js';
+import { getContent, S } from './content.js';
 const enc = new TextEncoder();
 
 export async function stripeApi(env, path, params) {
@@ -27,8 +28,28 @@ export async function markOrderPaid(env, orderId, extra = {}) {
   await env.DB.prepare("UPDATE orders SET status = 'pagado', paid_at = ?, stripe_session = COALESCE(?, stripe_session), method = COALESCE(NULLIF(?, ''), method) WHERE id = ?")
     .bind(now(), extra.session || null, extra.method || '', orderId).run();
   if (order.client_id) {
-    await env.DB.prepare("UPDATE clients SET plan = ?, status = 'activo', stripe_customer = COALESCE(?, stripe_customer), updated_at = ? WHERE id = ?")
-      .bind(order.package_id, extra.customer || null, now(), order.client_id).run();
+    const client = await env.DB.prepare('SELECT id, data, plan FROM clients WHERE id = ?').bind(order.client_id).first();
+    if (client) {
+      const isMaint = /-mant$/.test(order.package_id), pkgId = order.package_id.replace(/-mant$/, '');
+      const { content } = await getContent(env);
+      const pkg = S.packageOf(content, pkgId);
+      let data = S.sanitizeClientData(parseJson(client.data));
+      if (isMaint) {                       // mantenimiento de la página web
+        data = S.webActivate(data, 'Pago confirmado. Mantenimiento activo.'); data.web.maintenance = true;
+        data.web.timeline.unshift({ id: S.uid('l'), text: 'Mantenimiento mensual activado.', at: now() });
+        await env.DB.prepare("UPDATE clients SET data = ?, status = 'activo', stripe_customer = COALESCE(?, stripe_customer), updated_at = ? WHERE id = ?").bind(JSON.stringify(S.sanitizeClientData(data)), extra.customer || null, now(), client.id).run();
+      } else {
+        let plan = pkgId;
+        if (pkg && pkg.kind === 'unico') {
+          data = S.webActivate(data, 'Pago confirmado. Proyecto de página web iniciado.');
+          const cur = S.packageOf(content, client.plan);
+          if (cur && cur.kind === 'mensual') plan = client.plan;     // no pisa un plan mensual que ya tenga
+        }
+        await env.DB.prepare("UPDATE clients SET plan = ?, status = 'activo', data = ?, stripe_customer = COALESCE(?, stripe_customer), updated_at = ? WHERE id = ?")
+          .bind(plan, JSON.stringify(S.sanitizeClientData(data)), extra.customer || null, now(), client.id).run();
+      }
+    }
   }
   return order;
 }
+const parseJson = (s) => { try { return JSON.parse(s); } catch { return {}; } };

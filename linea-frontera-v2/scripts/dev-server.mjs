@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { dispatch } from '../functions/_lib/router.js';
 import '../functions/_lib/routes.js';
+import '../functions/_lib/web.js';
 import '../functions/_lib/admin.js';
+import '../functions/_lib/admin-web.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.argv[2] || process.env.PORT || 8788);
@@ -15,16 +17,21 @@ const port = Number(process.argv[2] || process.env.PORT || 8788);
 export function makeD1(file = ':memory:') {
   const db = new DatabaseSync(file);
   db.exec('PRAGMA foreign_keys = ON;');
-  for (const f of fs.readdirSync(path.join(root, 'migrations')).sort()) db.exec(fs.readFileSync(path.join(root, 'migrations', f), 'utf8'));
   return {
     prepare(sql) {
-      const st = db.prepare(sql);
+      const st = { get: (...a) => db.prepare(sql).get(...a), all: (...a) => db.prepare(sql).all(...a), run: (...a) => db.prepare(sql).run(...a) }; // preparación perezosa, como D1
       const mk = (args) => ({
         first: async () => st.get(...args) ?? null,
         all: async () => ({ results: st.all(...args) }),
         run: async () => { const r = st.run(...args); return { meta: { last_row_id: Number(r.lastInsertRowid), changes: Number(r.changes) } }; },
       });
       return { bind: (...args) => mk(args), ...mk([]) };
+    },
+    async batch(stmts) {
+      const out = [];
+      db.exec('BEGIN');
+      try { for (const s of stmts) out.push(await s.run()); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; }
+      return out;
     },
   };
 }

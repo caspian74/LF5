@@ -22,11 +22,20 @@
     download: '<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>', copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
     wa: '<path d="M20 12a8 8 0 0 1-11.900 7L4 20l1.100-4A8 8 0 1 1 20 12Z"/><path d="M9 8.500c0 3.500 3 6.500 6.500 6.500l1-1.600-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2L9 8.500Z"/>',
     eye: '<path d="M2 12s3.500-7 10-7 10 7 10 7-3.500 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>', phone: '<rect x="7" y="2.500" width="10" height="19" rx="2.500"/><path d="M11 18.500h2"/>', history: '<path d="M3 12a9 9 0 1 0 3-6.700L3 8M3 3v5h5M12 7v5l3 2"/>',
-    tag: '<path d="M3 12V4h8l10 10-8 8L3 12Z"/><circle cx="7.500" cy="8.500" r="1"/>'
+    tag: '<path d="M3 12V4h8l10 10-8 8L3 12Z"/><circle cx="7.500" cy="8.500" r="1"/>',
+    window: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 6.500h.01M10 6.500h.01"/>',
+    wand: '<path d="m4 20 11-11M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM19 12l.7 1.300 1.300.700-1.300.700L19 16l-.7-1.300-1.300-.700 1.300-.700L19 12Z"/>',
+    bell: '<path d="M6 17V11a6 6 0 0 1 12 0v6l1.500 2h-15L6 17ZM10 21h4"/>',
+    search: '<circle cx="11" cy="11" r="6.500"/><path d="m16 16 4.500 4.500"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    flag: '<path d="M5 21V4M5 5h12l-2 4 2 4H5"/>',
+    file: '<path d="M6 3h8l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4M8 12h8M8 16h6"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 8 8 5 8-5"/>'
   };
   function ic(n, cls) { return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[n] || P.tag) + '</svg>'; }
 
-  var COL = ['#E34A3D', '#D9AE62', '#92969B', '#D9AE62', '#DCD6CA'];
+  var COL = ['#FF3B5C', '#6C4DFF', '#3DDBB0', '#FFC93C', '#FF8FB1'];
 
   /* ---- gráficas SVG ---- */
   function niceMax(v) { if (v <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
@@ -38,7 +47,7 @@
     var max = niceMax(Math.max.apply(null, [0].concat(series.map(function (s) { return Math.max.apply(null, rows.map(function (r) { return +r[s.key] || 0; })); }))));
     var x = function (i) { return pl + i * (W - pl - pr) / (n - 1); }, y = function (v) { return pt + (1 - v / max) * (H - pt - pb); };
     var grid = '';
-    for (var k = 0; k <= 4; k++) { var gv = max * k / 4, gy = y(gv); grid += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + gy + '" y2="' + gy + '" stroke="rgba(9,9,9,.08)"/><text x="' + (pl - 6) + '" y="' + (gy + 3) + '" text-anchor="end">' + (gv >= 1000 ? Math.round(gv / 100) / 10 + 'k' : Math.round(gv)) + '</text>'; }
+    for (var k = 0; k <= 4; k++) { var gv = max * k / 4, gy = y(gv); grid += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + gy + '" y2="' + gy + '" stroke="rgba(23,17,46,.08)"/><text x="' + (pl - 6) + '" y="' + (gy + 3) + '" text-anchor="end">' + (gv >= 1000 ? Math.round(gv / 100) / 10 + 'k' : Math.round(gv)) + '</text>'; }
     var xl = [0, Math.floor((n - 1) / 2), n - 1].map(function (i) { return '<text x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') + '">' + e(shortDate(rows[i].date)) + '</text>'; }).join('');
     var paths = series.map(function (s, si) {
       var d = rows.map(function (r, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(+r[s.key] || 0).toFixed(1); }).join(' ');
@@ -47,7 +56,7 @@
     }).join('');
     var meta = { rows: rows.map(function (r) { var o = { date: r.date }; series.forEach(function (s) { o[s.key] = +r[s.key] || 0; }); return o; }), series: series, W: W, H: H, pl: pl, pr: pr };
     return '<div class="chart-box" data-chart="' + e(JSON.stringify(meta)) + '"><div class="legend">' + series.map(function (s) { return '<span><i style="background:' + s.color + '"></i>' + e(s.label) + '</span>'; }).join('') + '</div>' +
-      '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + e(opts.label || 'Gráfica') + '">' + grid + xl + paths + '<line class="cur" y1="' + pt + '" y2="' + (H - pb) + '" stroke="rgba(9,9,9,.35)" stroke-dasharray="3 3" style="display:none"/></svg><div class="tip"></div></div>';
+      '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + e(opts.label || 'Gráfica') + '">' + grid + xl + paths + '<line class="cur" y1="' + pt + '" y2="' + (H - pb) + '" stroke="rgba(23,17,46,.35)" stroke-dasharray="3 3" style="display:none"/></svg><div class="tip"></div></div>';
   }
   function bindCharts(root) {
     Array.prototype.forEach.call(root.querySelectorAll('[data-chart]'), function (box) {
@@ -68,7 +77,7 @@
   function bars(vals, labels, color) {
     var W = 420, H = 120, n = vals.length, max = Math.max.apply(null, vals.concat([1])), bw = (W - 8) / n;
     return '<svg class="chart" viewBox="0 0 ' + W + ' ' + (H + 18) + '" role="img" aria-label="Barras">' + vals.map(function (v, i) {
-      var h = v / max * (H - 8); return '<rect x="' + (4 + i * bw + 2) + '" y="' + (H - h) + '" width="' + (bw - 4) + '" height="' + Math.max(h, 2) + '" rx="4" fill="' + (color || '#D9AE62') + '"><title>' + e(labels[i]) + ': ' + v + '</title></rect>';
+      var h = v / max * (H - 8); return '<rect x="' + (4 + i * bw + 2) + '" y="' + (H - h) + '" width="' + (bw - 4) + '" height="' + Math.max(h, 2) + '" rx="4" fill="' + (color || '#6C4DFF') + '"><title>' + e(labels[i]) + ': ' + v + '</title></rect>';
     }).join('') + '<text x="4" y="' + (H + 14) + '">' + e(shortDate(labels[0])) + '</text><text x="' + (W - 4) + '" y="' + (H + 14) + '" text-anchor="end">' + e(shortDate(labels[n - 1])) + '</text></svg>';
   }
   function donut(parts) {

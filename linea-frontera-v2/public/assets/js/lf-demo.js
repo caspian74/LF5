@@ -34,6 +34,10 @@
     function needAdmin() { return !u ? err(401, 'no_session') : u.role !== 'admin' ? err(403, 'forbidden') : null; }
     var done = Promise.resolve();
     var r = (function () {
+      if (g.LF.demoWeb) {   // endpoints de página web, avisos y panel ampliado (lf-demo-web.js)
+        var x = g.LF.demoWeb({ db: db, method: method, q: q, b: b, u: u, h: { id: id, now: now, res: res, err: err, str: str, content: content, clientOf: clientOf, newClient: newClient, save: save, pubUser: pubUser, cOut: cOut, need: need, needAdmin: needAdmin } });
+        if (x !== undefined) return x;
+      }
       if (method === 'GET' && q === '/health') return res(200, { ok: true, demo: true, stripe: false, turnstile: '', needsSetup: false });
       if (method === 'GET' && q === '/content') return res(200, { ok: true, content: content(db), hash: S.contentHash(content(db)) });
       if (method === 'GET' && q === '/me') return res(200, { ok: true, user: u ? pubUser(u) : null });
@@ -91,7 +95,7 @@
         var c2 = clientOf(db, u.id) || newClient(db, { user_id: u.id, name: u.name, business: u.business, email: u.email });
         var o = { id: id(db), user_id: u.id, client_id: c2.id, package_id: pkg.id, package_name: pkg.name, amount: Math.round(pkg.price), currency: 'MXN', status: 'pendiente', method: 'manual', created_at: now(), paid_at: null };
         db.orders.push(o); save();
-        return res(200, { ok: true, orderId: o.id, manual: true, whatsapp: S.waLink(content(db).brand.whatsapp, 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(pkg.price) + ' MXN/mes). Pedido #' + o.id + '.'), package: { name: pkg.name, price: pkg.price } });
+        return res(200, { ok: true, orderId: o.id, manual: true, whatsapp: S.waLink(content(db).brand.whatsapp, 'Hola, quiero contratar el paquete ' + pkg.name + ' (' + S.money(pkg.price) + ' MXN/mes).'), package: { name: pkg.name, price: pkg.price } });
       }
       if (method === 'POST' && q === '/billing-portal') return err(501, 'stripe_not_configured');
       if (method === 'POST' && q === '/auth/setup-admin') return err(404, 'not_found');
