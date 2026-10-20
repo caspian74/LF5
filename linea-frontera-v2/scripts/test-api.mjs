@@ -53,7 +53,7 @@ r = await admin('GET', '/admin/overview'); ok(r.data.mrr === 9900, 'MRR calculad
 r = await admin('GET', '/admin/content'); const content = r.data.content;
 content.hero.title = 'Título <script>alert(1)</script> ||nuevo||'; content.theme.accent = 'javascript:1'; content.packages.items.find((p) => p.id === 'arranque').price = 5100; content.packages.items.find((p) => p.id === 'arranque').paymentLink = 'javascript:alert(1)';
 r = await admin('PUT', '/admin/content', { content, label: 'prueba' }); ok(r.data.ok, 'guardar contenido');
-r = await anon('GET', '/content'); ok(r.data.content.hero.title.includes('nuevo') && r.data.content.theme.accent === '#FF3B5C' && r.data.content.packages.items.find((p) => p.id === 'arranque').paymentLink === '', 'contenido saneado y público');
+r = await anon('GET', '/content'); ok(r.data.content.hero.title.includes('nuevo') && r.data.content.theme.accent === '#E34A3D' && r.data.content.packages.items.find((p) => p.id === 'arranque').paymentLink === '', 'contenido saneado y público');
 r = await user('POST', '/checkout', { packageId: 'arranque' }); ok(r.data.whatsapp.includes(encodeURIComponent('$5,100')), 'checkout usa precio del servidor');
 r = await user('PUT', '/admin/content', { content }); ok(r.status === 405 || r.status === 403, 'cliente no edita sitio');
 r = await admin('GET', '/admin/versions'); ok(r.data.versions.length === 1, 'versión guardada');

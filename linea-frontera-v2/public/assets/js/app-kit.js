@@ -35,7 +35,7 @@
   };
   function ic(n, cls) { return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[n] || P.tag) + '</svg>'; }
 
-  var COL = ['#FF3B5C', '#6C4DFF', '#3DDBB0', '#FFC93C', '#FF8FB1'];
+  var COL = ['#E34A3D', '#090909', '#A87A2A', '#5E6369', '#D9AE62'];
 
   /* ---- gráficas SVG ---- */
   function niceMax(v) { if (v <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
@@ -77,7 +77,7 @@
   function bars(vals, labels, color) {
     var W = 420, H = 120, n = vals.length, max = Math.max.apply(null, vals.concat([1])), bw = (W - 8) / n;
     return '<svg class="chart" viewBox="0 0 ' + W + ' ' + (H + 18) + '" role="img" aria-label="Barras">' + vals.map(function (v, i) {
-      var h = v / max * (H - 8); return '<rect x="' + (4 + i * bw + 2) + '" y="' + (H - h) + '" width="' + (bw - 4) + '" height="' + Math.max(h, 2) + '" rx="4" fill="' + (color || '#6C4DFF') + '"><title>' + e(labels[i]) + ': ' + v + '</title></rect>';
+      var h = v / max * (H - 8); return '<rect x="' + (4 + i * bw + 2) + '" y="' + (H - h) + '" width="' + (bw - 4) + '" height="' + Math.max(h, 2) + '" rx="4" fill="' + (color || '#090909') + '"><title>' + e(labels[i]) + ': ' + v + '</title></rect>';
     }).join('') + '<text x="4" y="' + (H + 14) + '">' + e(shortDate(labels[0])) + '</text><text x="' + (W - 4) + '" y="' + (H + 14) + '" text-anchor="end">' + e(shortDate(labels[n - 1])) + '</text></svg>';
   }
   function donut(parts) {

@@ -97,9 +97,9 @@
         (function step(t) { var k = Math.min(1, (t - t0) / 900), v = end * (1 - Math.pow(1 - k, 3)); el.textContent = m[1] + v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[3]; if (k < 1) requestAnimationFrame(step); else el.textContent = raw; })(t0);
       });
     }, { threshold: 0.5 });
-    $$('.kpi strong[data-count]').forEach(function (el) { obs.observe(el); });
+    $$('[data-count]').forEach(function (el) { obs.observe(el); });
     if (g.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      $$('.card').forEach(function (c) { c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }, { passive: true }); });
+      $$('.svc').forEach(function (c) { c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }, { passive: true }); });
     }
   }
 
@@ -117,8 +117,8 @@
     $$('[data-track]').forEach(function (a) { a.addEventListener('click', function () { ui.track(a.dataset.track, { where: a.dataset.where || '' }); }); });
     var d = $('#buy-modal'); if (d) { d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('.modal-x')) d.close(); }); }
     initCalc(); initForm(); reveal(); initFx();
-    var onScroll = function () { if (top) top.classList.toggle('stuck', g.scrollY > 8); };
-    if (!bound) { g.addEventListener('scroll', onScroll, { passive: true }); bound = true; } onScroll();
+    if (g.LF.motion) g.LF.motion.init();
+    else { var onScroll = function () { if (top) top.classList.toggle('stuck', g.scrollY > 8); }; if (!bound) { g.addEventListener('scroll', onScroll, { passive: true }); bound = true; } onScroll(); }
   }
 
   function render(c) {

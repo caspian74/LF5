@@ -1,3 +1,4 @@
+@import url("/assets/css/fonts.css");
 /* Línea Frontera · base: tokens, reset, botones, formularios */
 :root{
   --accent:#FF3B5C;--accent2:#6C4DFF;--accent3:#3DDBB0;--sun:#FFC93C;--sakura:#FF8FB1;--ink:#17112E;--paper:#FFF8F0;
@@ -103,3 +104,31 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var
 :focus-visible{outline-width:2px}
 .kicker{background:rgba(108,77,255,.10);color:var(--accent2);border:1px solid rgba(108,77,255,.18)}
 .kicker.light{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28)}
+
+/* ===== Identidad v3 (Línea Frontera): negro, marfil, rojo señal, dorado ===== */
+:root{
+  --accent:#E34A3D;--accent2:#A87A2A;--accent3:#5E6369;--sun:#D9AE62;--sakura:#E34A3D;--ink:#090909;--paper:#F4F0E8;
+  --ink-2:#3A3833;--ink-3:#6B6760;--line:rgba(9,9,9,.11);--line-2:rgba(9,9,9,.2);--tint:#ECE6DA;--card:#FBF9F4;
+  --grad:linear-gradient(135deg,#E34A3D 0%,#C9392D 100%);
+  --sh-1:0 1px 2px rgba(9,9,9,.05),0 6px 20px -8px rgba(9,9,9,.14);
+  --sh-2:0 2px 4px rgba(9,9,9,.05),0 24px 56px -18px rgba(9,9,9,.28);
+  --sh-glow:0 10px 26px -12px rgba(227,74,61,.7);
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-jp:"Archivo",sans-serif;
+  --r-s:4px;--r-m:8px;--r-l:12px;--r-xl:16px;
+}
+body{background:var(--paper);background-image:none}
+h1,h2{font-style:italic;font-weight:900;font-stretch:112%;letter-spacing:-.005em}
+h3,h4{font-stretch:105%}
+:focus-visible{outline-color:var(--ink)}
+::selection{background:var(--accent);color:#fff}
+input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--ink);box-shadow:0 0 0 3px rgba(227,74,61,.22)}
+.btn{border-radius:4px;font-family:var(--f-display);font-style:italic;font-weight:800;font-stretch:110%;text-transform:uppercase;letter-spacing:.03em;font-size:.9rem}
+.btn-dark{background:var(--ink)}
+.kicker{background:transparent;color:var(--ink-3);border:1px solid var(--line-2);font-family:"IBM Plex Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.12em}
+.kicker.light{background:transparent;color:#F4F0E8;border-color:rgba(244,240,232,.3)}
+.logo-mark{width:42px!important;height:28px!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='215 100 610 400'%3E%3Cpath fill='%23090909' d='M440 125h56L306 355h200l-26 37H228z'/%3E%3Cpath fill='%23090909' d='M525 232h190l-24 40H558l-21 28h114l-24 42H504L388 490h-68z'/%3E%3Cpath fill='%23E34A3D' d='M748 106Q757 169 820 178Q757 187 748 250Q739 187 676 178Q739 169 748 106Z'/%3E%3C/svg%3E") center/contain no-repeat!important;overflow:visible}
+.logo-mark i{display:none!important}
+.logo.light .logo-mark{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='215 100 610 400'%3E%3Cpath fill='%23F4F0E8' d='M440 125h56L306 355h200l-26 37H228z'/%3E%3Cpath fill='%23F4F0E8' d='M525 232h190l-24 40H558l-21 28h114l-24 42H504L388 490h-68z'/%3E%3Cpath fill='%23E34A3D' d='M748 106Q757 169 820 178Q757 187 748 250Q739 187 676 178Q739 169 748 106Z'/%3E%3C/svg%3E")!important}
+.logo>span:last-child{font-family:var(--f-display);font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:.01em}

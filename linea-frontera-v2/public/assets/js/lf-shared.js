@@ -5,10 +5,10 @@
   var SECTION_IDS = ['problem', 'services', 'web', 'process', 'demo', 'packages', 'calculator', 'audience', 'proof', 'faq', 'contact', 'cta'];
 
   var DEFAULTS = {
-    v: 2,
+    v: 3,
     brand: {
       name: 'Línea Frontera',
-      tagline: 'Marketing chill para negocios de Tijuana',
+      tagline: 'Ideas que cruzan fronteras',
       whatsapp: '5632960874',
       email: 'rcabrerar17@gmail.com',
       city: 'Tijuana, Baja California',
@@ -17,7 +17,7 @@
       facebook: '',
       tiktok: ''
     },
-    theme: { accent: '#FF3B5C', accent2: '#6C4DFF', accent3: '#3DDBB0', sun: '#FFC93C', sakura: '#FF8FB1', ink: '#17112E', paper: '#FFF8F0' },
+    theme: { accent: '#E34A3D', accent2: '#D9AE62', accent3: '#92969B', sun: '#FFF6E5', sakura: '#141414', ink: '#090909', paper: '#F4F0E8' },
     seo: {
       title: 'Línea Frontera · Marketing para negocios de Tijuana',
       description: 'Páginas web desde $5,900 MXN (pago único) y marketing mensual desde $4,900 para negocios de Tijuana: anuncios, contenido, SEO local y panel de resultados. Pide tu diagnóstico gratis.',
@@ -27,7 +27,7 @@
     announce: { enabled: true, text: 'Diagnóstico gratis para negocios de Tijuana. Cupo de nuevos clientes cada mes.', link: '#contacto', linkText: 'Pedirlo' },
     sections: { order: SECTION_IDS.slice(), hidden: [] },
     hero: {
-      badge: 'Agencia de Tijuana',
+      badge: 'Agencia de marketing · Tijuana, B.C.',
       title: 'Haz que Tijuana te ||encuentre||, te escriba y te compre.',
       sub: 'Juntamos anuncios, contenido y SEO local en un solo plan mensual. Tú ves cuántos mensajes y ventas llegaron en tu panel, sin tecnicismos.',
       cta1: 'Pedir diagnóstico gratis',
@@ -203,6 +203,13 @@
       if (s.packages && Array.isArray(s.packages.items) && !s.packages.items.some(function (p) { return p && p.id === 'sitio'; })) s.packages.items.unshift(clone(DEFAULTS.packages.items[0]));
       if (s.sections && Array.isArray(s.sections.order) && s.sections.order.indexOf('web') < 0) { var i = s.sections.order.indexOf('services'); s.sections.order.splice(i < 0 ? 0 : i + 1, 0, 'web'); }
       s.v = 2;
+    }
+    if (!(Number(s.v) >= 3)) {
+      // v3: nueva identidad visual (negro, marfil, rojo señal, dorado). Los colores de la marca anterior se reemplazan.
+      s.theme = clone(DEFAULTS.theme);
+      if (s.brand && s.brand.tagline === 'Marketing chill para negocios de Tijuana') s.brand.tagline = DEFAULTS.brand.tagline;
+      if (s.hero && s.hero.badge === 'Agencia de Tijuana') s.hero.badge = DEFAULTS.hero.badge;
+      s.v = 3;
     }
     return s;
   }

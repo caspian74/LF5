@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<meta name="theme-color" content="#FFF8F0">
+<meta name="theme-color" content="#090909">
 <title><!--LF:TITLE--></title>
 <meta name="description" content="<!--LF:DESC-->">
 <meta name="lf-hash" content="<!--LF:HASH-->">
@@ -19,12 +19,10 @@
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@900&display=swap">
+<link rel="preload" href="/assets/fonts/archivo-italic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <style id="lf-theme"><!--LF:THEME--></style>
-<link rel="stylesheet" href="/assets/css/base.css">
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/landing.css">
 <script src="/assets/js/boot.js"></script>
 <script type="application/ld+json"><!--LF:JSONLD--></script>
 </head>
@@ -32,7 +30,7 @@
 <div id="app"><!--LF:BODY--></div>
 <dialog class="modal" id="buy-modal" aria-labelledby="buy-title">
   <div class="modal-in">
-    <button class="modal-x" type="button" aria-label="Cerrar">×</button>
+    <button class="modal-x" type="button" aria-label="Cerrar">&times;</button>
     <h3 id="buy-title"></h3>
     <p id="buy-text"></p>
     <a class="btn btn-primary block" id="buy-wa" target="_blank" rel="noopener"><span>Confirmar por WhatsApp</span></a>
@@ -46,6 +44,7 @@
 <script src="/assets/js/lf-demo.js"></script>
 <script src="/assets/js/lf-demo-web.js"></script>
 <script src="/assets/js/lf-ui.js"></script>
+<script src="/assets/js/lf-motion.js"></script>
 <script src="/assets/js/site.js"></script>
 </body>
 </html>

@@ -9,6 +9,14 @@ Sitio de agencia de marketing para Tijuana. Todo corre en Cloudflare (gratis par
 - **Admin** (`/admin.html`): resumen con "requiere atención", clientes (campañas, resultados, contenido, SEO, tareas, **Sitio web** e **Interno**), **Proyectos web** (tablero por etapas), **Generador** de páginas, leads, pedidos (también manuales), tickets, usuarios, editor de todo el sitio con vista previa y versiones, herramientas (UTM, cotizador de páginas, avisos a clientes), buscador **Ctrl+K**, "ver como cliente" y estado del sistema.
 - **`/t.js`**: script de medición para la página de un cliente (visitas, clics a WhatsApp, llamadas y formularios que llegan a su panel).
 
+## Diseño v3 (identidad Línea Frontera)
+
+- Paleta de marca: negro `#090909`, marfil `#F4F0E8`, rojo señal `#E34A3D`, dorado `#D9AE62`, gris acero `#92969B`. Se editan en Admin → Sitio → Colores.
+- Al publicar esta versión, el contenido guardado se actualiza solo a la nueva paleta (los textos que editaste se conservan).
+- Tipografías propias en `public/assets/fonts` (Archivo e IBM Plex Mono, licencia OFL): no dependen de Google Fonts.
+- La landing usa `assets/css/landing.css` y `assets/js/lf-motion.js` (animaciones). Todo el movimiento se apaga si el visitante tiene activado "reducir movimiento".
+- Los títulos se muestran en mayúsculas por diseño; en el editor puedes escribirlos normal y seguir usando `||palabra||` para marcar en rojo.
+
 ## Actualizar el sitio en Cloudflare (lo que haces cada vez que recibes archivos nuevos)
 
 La base de datos **se actualiza sola**: no tienes que pegar SQL.

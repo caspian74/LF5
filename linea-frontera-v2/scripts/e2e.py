@@ -73,11 +73,11 @@ async def main():
         # editor del sitio
         await ap.click('.side [data-v=sitio]'); await ap.wait_for_selector('[data-sp="hero.title"]')
         await ap.fill('[data-sp="hero.title"]','Título editado por el admin ||E2E||'); await ap.wait_for_timeout(600)
-        pv=ap.frame_locator('#pv').locator('h1'); check('Título editado' in await pv.inner_text(),'vista previa en vivo')
+        pv=ap.frame_locator('#pv').locator('h1'); check('título editado' in (await pv.inner_text()).lower(),'vista previa en vivo')  # el diseño muestra títulos en mayúsculas
         await ap.click('[data-s=save]'); await ap.wait_for_timeout(800)
         v=await b.new_context(viewport={'width':1280,'height':800}); vp=await v.new_page(); watch(vp,'home2')
         await vp.goto(BASE+'/'); await vp.wait_for_timeout(1200)
-        check('Título editado' in await vp.inner_text('h1'),'home refleja cambio publicado desde admin')
+        check('título editado' in (await vp.inner_text('h1')).lower(),'home refleja cambio publicado desde admin')
         # admin móvil
         await ap.set_viewport_size({'width':390,'height':844}); await ap.click('.mnav [data-v=clientes]'); await ap.wait_for_timeout(500); await ap.screenshot(path=SH+'admin-m.png')
 
