@@ -137,6 +137,7 @@
     var app = $('#app'); if (!app) return;
     var baked = $('meta[name=lf-hash]');
     content = S.resolveContent(g.__LF_CONTENT || {});
+    ui.initAnalytics(content.seo); // Google Analytics desde la primera carga, sin esperar a la API
     bind();
     api.ready().then(function () {
       ui.demoBanner();

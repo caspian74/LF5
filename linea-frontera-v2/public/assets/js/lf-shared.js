@@ -5,7 +5,7 @@
   var SECTION_IDS = ['problem', 'services', 'web', 'process', 'demo', 'packages', 'calculator', 'audience', 'proof', 'faq', 'contact', 'cta'];
 
   var DEFAULTS = {
-    v: 3,
+    v: 4,
     brand: {
       name: 'Línea Frontera',
       tagline: 'Ideas que cruzan fronteras',
@@ -21,7 +21,7 @@
     seo: {
       title: 'Línea Frontera · Marketing para negocios de Tijuana',
       description: 'Páginas web desde $5,900 MXN (pago único) y marketing mensual desde $4,900 para negocios de Tijuana: anuncios, contenido, SEO local y panel de resultados. Pide tu diagnóstico gratis.',
-      ga4: '',
+      ga4: 'G-FE1ZVHFT55',
       metaPixel: ''
     },
     announce: { enabled: true, text: 'Diagnóstico gratis para negocios de Tijuana. Cupo de nuevos clientes cada mes.', link: '#contacto', linkText: 'Pedirlo' },
@@ -210,6 +210,12 @@
       if (s.brand && s.brand.tagline === 'Marketing chill para negocios de Tijuana') s.brand.tagline = DEFAULTS.brand.tagline;
       if (s.hero && s.hero.badge === 'Agencia de Tijuana') s.hero.badge = DEFAULTS.hero.badge;
       s.v = 3;
+    }
+    if (!(Number(s.v) >= 4)) {
+      // v4: Google Analytics de Línea Frontera activo si aún no se había puesto un ID
+      if (!s.seo || typeof s.seo !== 'object') s.seo = {};
+      if (!s.seo.ga4) s.seo.ga4 = DEFAULTS.seo.ga4;
+      s.v = 4;
     }
     return s;
   }
