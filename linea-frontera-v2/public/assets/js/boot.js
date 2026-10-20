@@ -1,6 +1,12 @@
 /* Se ejecuta en <head>: marca JS activo y guarda UTM de la primera visita. */
 (function () {
   var d = document.documentElement; d.classList.add('js');
+  // pantalla de entrada con el logo: solo en la portada, una vez por sesión y sin "reducir movimiento"
+  try {
+    var home = location.pathname === '/' || location.pathname === '/index.html';
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (home && !calm && !sessionStorage.getItem('lf_intro')) { d.classList.add('intro'); sessionStorage.setItem('lf_intro', '1'); }
+  } catch (e) { /* sin almacenamiento: sin intro */ }
   try {
     var q = new URLSearchParams(location.search), keep = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref'], u = {}, any = false;
     keep.forEach(function (k) { if (q.get(k)) { u[k] = q.get(k).slice(0, 120); any = true; } });

@@ -13,7 +13,9 @@ Sitio de agencia de marketing para Tijuana. Todo corre en Cloudflare (gratis par
 
 - Paleta de marca: negro `#090909`, marfil `#F4F0E8`, rojo señal `#E34A3D`, dorado `#D9AE62`, gris acero `#92969B`. Se editan en Admin → Sitio → Colores.
 - Al publicar esta versión, el contenido guardado se actualiza solo a la nueva paleta (los textos que editaste se conservan).
-- Tipografías propias en `public/assets/fonts` (Archivo e IBM Plex Mono, licencia OFL): no dependen de Google Fonts.
+- Tipografías propias en `public/assets/fonts` (Exo 2 para títulos, combina con el logotipo; Archivo para texto; licencia OFL): no dependen de Google Fonts.
+- Logos oficiales vectorizados dentro de `lf-render.js` (monograma LF, logotipo LINEA FRONTERA, sello y etiqueta vertical) y en `assets/img/logo-mark.svg`.
+- Pantalla de entrada con el logo: solo la primera vez por sesión en la portada.
 - La landing usa `assets/css/landing.css` y `assets/js/lf-motion.js` (animaciones). Todo el movimiento se apaga si el visitante tiene activado "reducir movimiento".
 - Los títulos se muestran en mayúsculas por diseño; en el editor puedes escribirlos normal y seguir usando `||palabra||` para marcar en rojo.
 

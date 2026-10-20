@@ -7,7 +7,10 @@
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
+  var introWait = document.documentElement.classList.contains('intro');
+  if (introWait) setTimeout(function () { document.documentElement.classList.remove('intro'); }, 1950);
   function reveal() {
+    if (introWait) { introWait = false; setTimeout(reveal, 1250); return; }
     var els = $$('[data-reveal]:not(.in)');
     if (!('IntersectionObserver' in g)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
     if (io) io.disconnect();

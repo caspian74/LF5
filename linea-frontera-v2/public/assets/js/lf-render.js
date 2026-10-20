@@ -56,27 +56,38 @@
       (sub ? '<p class="lead"' + rv(2) + '>' + e(sub) + '</p>' : '') + '</header>';
   }
 
+  /* Logos oficiales de Línea Frontera (vectorizados de los archivos de marca) */
+  var LOGO = {"mw": 921.0, "mh": 626.0, "mb": "M784.2 206.5 407 208.5 301 368 210 370 208.2 365.2 423.2 39 288.8 43.5 2 467.5 253.8 431.5 254.5 435.2 134.8 622.5 273.8 592.2 386.2 428.5 576.5 426 668.2 342.5 448 342 447.5 337.2 480.5 288.5 704.5 281.5Z", "ms": "M818 2.0C822 94.9 834.2 108.2 919 112.6C834.2 117 822 130.3 818 223.2C814 130.3 801.8 117 717 112.6C801.8 108.2 814 94.9 818 2.0Z", "ww": 1026.7, "wh": 218.5, "wb": "M595.7 122.5 499.7 122.7 493 142.7 519.5 143 524.3 148 498.8 214.5 522.3 214.3 552.3 146.2 586.8 142.2Z M896.7 123.3 863.8 123.5 783.2 214.7 812.2 216 827.3 203.7 852.8 202.7 874.3 203.7 881.2 215.7 905.5 215.2Z M870.7 156.8 873 179.8 867.3 182.8 848.8 181.3 848.3 176.2 863.2 157.5Z M716.5 122.2 679.7 215 705.3 214.8 715.3 194.5 721.7 187.7 728.7 186.5 737.5 189.2 750.5 215.2 781 214.5 771.3 189.5 788.2 179.5 795.2 171 806.7 139 806 131 792.8 121.7Z M728.5 162 737.8 143.3 769.2 143.2 774.3 146.3 773.3 154.5 765 164.8 734.5 166.3Z M609.8 122.7 572.3 214.8 662.5 215.5 671 198.5 669.7 193.3 616.3 193 611.8 190.7 611.3 184 620.7 178 663.7 178.2 675.3 158.5 628.2 157.7 624.3 155.2 624.7 148.7 635.2 143.2 690.3 144 701.7 123.5Z M238.8 126.5 228.3 121.2 147.3 122.8 109.2 214.8 134 215.2 144.7 192.2 151.7 187.3 160.8 187 172.7 194.3 181.5 215.3 209 214.8 202.3 188.8 217.7 182.2 225.2 174.2 241.2 133.8Z M159 163 161.2 152.2 169.2 142.7 202.7 142.5 208.2 146.2 203 160.7 196.2 165.8 165.8 166.5Z M484.8 123.7 459 123.3 443.5 165.8 437.3 169.2 431.8 165.8 411.5 121.8 386.7 122 346.3 214.3 370.2 214.8 391.8 167.3 399.2 163.5 421.7 213.8 447.7 215.2Z M361.8 128.8 351.8 120.8 270 123.7 253.7 142.7 230.7 200 230.7 207.7 242.8 215.5 313 215.5 327.3 210.2 339.2 192.5 362.5 135.0Z M328.8 145 309.7 192.3 272.3 193.8 264.3 191.2 264 183.3 282.5 144.5Z M134.2 121.3 44.7 122.2 2.3 214.8 27.7 214.8 48 181.3 84.8 181 91.5 177.8 99.7 160 61.8 159 58.8 152.5 62.5 145.2 122.3 142.8 128.8 137.5Z M358 3.3 319.2 99.7 411.7 98.7 421.3 76.5 362.8 76.7 359.2 74.3 359.2 67.8 368.2 60.8 416.7 59.7 422.5 38.8 378.2 39.3 373.8 35.8 375.7 29 382.8 24.5 440.2 24 450.2 3.7Z M533 4.2 504.2 3.3 422.8 99 447.5 100.3 464 87.3 511.2 88 518.2 100.7 541.7 100.7Z M508.2 38.3 509.7 64.5 485.8 66 486.8 57 499.7 42.0Z M235.7 2.8 198.3 98.8 221.2 98.3 243.5 50.5 249 48.3 273.5 98.8 301.5 99.5 339.8 3.5 314 2.8 294.5 51 289 54.3 264.2 3.5Z M218.5 2.5 191.7 4.3 152.2 95.5 152.8 100.5 174.2 101 181.5 95.3 219.5 6.8Z M121.7 2.5 95 4.7 55.3 92.3 55.3 99.7 132.8 100.3 139 94.8 145.5 81.3 143.7 78.7 100.7 77.8 94 73.8Z", "ws": "M998 65.5C999.1 91.7 1002.3 95.4 1024.7 96.7C1002.3 97.9 999.1 101.7 998 127.8C996.9 101.7 993.7 97.9 971.3 96.7C993.7 95.4 996.9 91.7 998 65.5Z"};
+
   /* ---------- piezas de marca (SVG) ---------- */
-  function starPath(cx, cy, r, w) {
-    return 'M' + cx + ' ' + (cy - r) + 'Q' + (cx + w) + ' ' + (cy - w) + ' ' + (cx + r) + ' ' + cy + 'Q' + (cx + w) + ' ' + (cy + w) + ' ' + cx + ' ' + (cy + r) +
-      'Q' + (cx - w) + ' ' + (cy + w) + ' ' + (cx - r) + ' ' + cy + 'Q' + (cx - w) + ' ' + (cy - w) + ' ' + cx + ' ' + (cy - r) + 'Z';
+  /* Estrella de 4 puntas de la marca (brazos delgados) */
+  function starPath(cx, cy, rx, ry) {
+    ry = ry || rx; var a = 0.05, b = 0.18;
+    function P(x, y) { return (Math.round(x * 10) / 10) + ' ' + (Math.round(y * 10) / 10); }
+    return 'M' + P(cx, cy - ry) + 'C' + P(cx + rx * a, cy - ry * b) + ' ' + P(cx + rx * b, cy - ry * a) + ' ' + P(cx + rx, cy) +
+      'C' + P(cx + rx * b, cy + ry * a) + ' ' + P(cx + rx * a, cy + ry * b) + ' ' + P(cx, cy + ry) +
+      'C' + P(cx - rx * a, cy + ry * b) + ' ' + P(cx - rx * b, cy + ry * a) + ' ' + P(cx - rx, cy) +
+      'C' + P(cx - rx * b, cy - ry * a) + ' ' + P(cx - rx * a, cy - ry * b) + ' ' + P(cx, cy - ry) + 'Z';
   }
+  var STAR_D = starPath(50, 50, 50);
   function star(cls) {
-    return '<svg class="star ' + (cls || '') + '" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="' + starPath(50, 50, 50, 7) + '" fill="currentColor"/></svg>';
+    return '<svg class="star ' + (cls || '') + '" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="' + STAR_D + '" fill="currentColor"/></svg>';
   }
-  /* Monograma LF con estrella (trazo propio de la marca) */
+  /* Monograma LF oficial con su estrella */
   function mark(cls) {
-    return '<svg class="lf-mark ' + (cls || '') + '" viewBox="215 100 610 400" aria-hidden="true" focusable="false">' +
-      '<path fill="currentColor" d="M440 125h56L306 355h200l-26 37H228z"/>' +
-      '<path fill="currentColor" d="M525 232h190l-24 40H558l-21 28h114l-24 42H504L388 490h-68z"/>' +
-      '<path class="lf-mark-star" fill="currentColor" d="' + starPath(748, 178, 72, 9) + '"/></svg>';
+    return '<svg class="lf-mark ' + (cls || '') + '" viewBox="0 0 ' + LOGO.mw + ' ' + LOGO.mh + '" aria-hidden="true" focusable="false">' +
+      '<path class="lf-mark-body" fill="currentColor" d="' + LOGO.mb + '"/><path class="lf-mark-star" fill="currentColor" d="' + LOGO.ms + '"/></svg>';
   }
+  /* Logotipo "LINEA FRONTERA" oficial (si cambias el nombre de la marca en el panel, se usa texto) */
+  function isLF(c) { return /^l[ií]nea\s+frontera$/i.test(String(c.brand.name || '').trim()); }
   function wordmark(c, cls) {
+    if (isLF(c)) return '<svg class="wordmark-svg ' + (cls || '') + '" viewBox="0 0 ' + LOGO.ww + ' ' + LOGO.wh + '" role="img" aria-label="' + e(c.brand.name) + '" focusable="false">' +
+      '<path fill="currentColor" fill-rule="evenodd" d="' + LOGO.wb + '"/><path class="wm-star" fill="currentColor" d="' + LOGO.ws + '"/></svg>';
     var n = String(c.brand.name || '').trim(), parts = n.split(/\s+/);
     var l1 = parts.length > 1 ? parts.slice(0, Math.ceil(parts.length / 2)).join(' ') : n, l2 = parts.length > 1 ? parts.slice(Math.ceil(parts.length / 2)).join(' ') : '';
     return '<span class="wordmark ' + (cls || '') + '"><span>' + e(l1) + '</span>' + (l2 ? '<span>' + e(l2) + '</span>' : '') + '</span>';
   }
-  /* Sello circular con texto */
+  /* Sello circular con texto corrido (paquete recomendado) */
   var stampN = 0;
   function stamp(text, cls, inner) {
     var id = 'stp' + (++stampN);
@@ -84,6 +95,22 @@
       '<circle cx="100" cy="100" r="97" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
       '<g class="stamp-ring"><text><textPath href="#' + id + '" startOffset="0" textLength="486" lengthAdjust="spacing">' + e(text) + '</textPath></text></g></svg>' +
       '<span class="stamp-in">' + (inner || mark()) + '</span></span>';
+  }
+  /* Sello oficial: LINEA FRONTERA arriba, TIJUANA · BAJA CALIFORNIA abajo, EST. / 2026 a los lados */
+  function seal(c, cls) {
+    var id = 'seal' + (++stampN), top = String(c.brand.name || '').toUpperCase(), city = String(c.brand.city || '').toUpperCase().replace(/,\s*/, ' · ');
+    return '<span class="seal-badge ' + (cls || '') + '" aria-hidden="true"><svg viewBox="0 0 300 300" focusable="false"><defs>' +
+      '<path id="' + id + 't" d="M48 150a102 102 0 0 1 204 0"/><path id="' + id + 'b" d="M36 150a114 114 0 0 0 228 0"/></defs>' +
+      '<circle class="seal-ring" cx="150" cy="150" r="146" fill="none" stroke="currentColor" stroke-width="3"/>' +
+      '<g class="seal-text"><text font-size="24" letter-spacing="4"><textPath href="#' + id + 't" startOffset="50%" text-anchor="middle">' + e(top) + '</textPath></text>' +
+      '<text font-size="15" letter-spacing="3"><textPath href="#' + id + 'b" startOffset="50%" text-anchor="middle">' + e(city) + '</textPath></text></g>' +
+      '<text class="seal-side" x="22" y="157" font-size="17" letter-spacing="1">EST.</text><text class="seal-side" x="278" y="157" font-size="17" letter-spacing="1" text-anchor="end">2026</text>' +
+      '<g transform="translate(85 104) scale(' + (130 / LOGO.mw).toFixed(4) + ')"><path class="lf-mark-body" fill="currentColor" d="' + LOGO.mb + '"/><path class="lf-mark-star" fill="currentColor" d="' + LOGO.ms + '"/></g></svg></span>';
+  }
+  /* Etiqueta vertical: estrella / logotipo / CREATIVIDAD SIN LÍMITES / TIJUANA · B.C. EST. 2026 */
+  function tagCard(c, cls) {
+    return '<div class="tag-card ' + (cls || '') + '" aria-hidden="true" data-tilt-card><div class="tc-row tc-star">' + star() + '</div><div class="tc-row tc-logo">' + wordmark(c) + '</div>' +
+      '<div class="tc-row tc-claim">Creatividad<br>sin límites</div><div class="tc-row tc-place">Tijuana · B.C.<br>Est. 2026</div></div>';
   }
 
   /* Franjas diagonales rojo/dorado (patrón de la marca) */
@@ -145,7 +172,7 @@
 
   R.problem = function (c) {
     var p = c.problem;
-    return '<section class="sec" id="problema" aria-labelledby="h-problema"><div class="wrap">' + head('Te entendemos', p.title, '', false, 'h-problema') +
+    return '<section class="sec" id="problema" aria-labelledby="h-problema"><div class="wrap">' + head('Te entendemos', p.title, '', true, 'h-problema') +
       '<ol class="pains">' + p.items.map(function (it, i) {
         return '<li class="pain"' + rv(i + 1) + '><span class="pain-n" aria-hidden="true">' + pad2(i + 1) + '</span><div><h3>' + e(it.t) + '</h3><p>' + e(it.d) + '</p></div>' + star('pain-star') + '</li>';
       }).join('') + '</ol></div></section>';
@@ -153,7 +180,7 @@
 
   R.services = function (c) {
     var s = c.services;
-    return '<section class="sec" id="servicios"><div class="wrap">' + head('Servicios', s.title, s.sub) +
+    return '<section class="sec" id="servicios"><div class="wrap">' + head('Servicios', s.title, s.sub, true) +
       '<div class="svc-grid">' + s.items.map(function (it, i) {
         return '<article class="card svc"' + rv(i % 3 + 1) + '><div class="svc-top"><span class="svc-n">Servicio / ' + pad2(i + 1) + '</span><span class="svc-ic">' + icon(it.icon) + '</span></div>' +
           '<h3>' + e(it.t) + '</h3><p>' + e(it.d) + '</p><span class="svc-bar" aria-hidden="true"></span></article>';
@@ -175,7 +202,7 @@
 
   R.process = function (c) {
     var p = c.process;
-    return '<section class="sec" id="proceso"><div class="wrap">' + head('Proceso', p.title) +
+    return '<section class="sec" id="proceso"><div class="wrap">' + head('Proceso', p.title, '', true) +
       '<ol class="steps" data-steps style="--n:' + p.steps.length + '">' + p.steps.map(function (st, i) {
         return '<li class="step"' + rv(i + 1) + '><span class="step-n">' + pad2(i + 1) + '</span><h3>' + e(st.t) + '</h3><p>' + e(st.d) + '</p></li>';
       }).join('') + '</ol></div></section>';
@@ -190,7 +217,7 @@
       ['Ventas cerradas', S.num(t.sales)],
       ['Retorno', t.roas.toFixed(1) + 'x']
     ];
-    return '<section class="sec" id="panel"><div class="wrap">' + head('Panel del cliente', d.title, d.sub) +
+    return '<section class="sec" id="panel"><div class="wrap">' + head('Panel del cliente', d.title, d.sub, true) +
       '<div class="mock"' + rv(2, 'rise') + '><div class="mock-bar"><i></i><i></i><i></i><span>' + e(c.brand.domain) + '/cuenta</span><b class="tag-ex">Ejemplo</b></div>' +
       '<div class="mock-body"><div class="kpis">' + kp.map(function (k, i) {
         return '<div class="kpi"><span>' + e(k[0]) + '</span><strong data-count="' + e(k[1]) + '">' + e(k[1]) + '</strong>' + (i === 0 ? '<em>+18% vs. mes anterior</em>' : '') + '</div>';
@@ -230,7 +257,7 @@
     function f(id, label, val, step, suffix) {
       return '<label class="fld"><span>' + label + '</span><div class="num-in"><input id="' + id + '" type="number" inputmode="decimal" min="0" step="' + step + '" value="' + val + '">' + (suffix ? '<i>' + suffix + '</i>' : '') + '</div></label>';
     }
-    return '<section class="sec" id="calculadora"><div class="wrap">' + head('Calculadora', k.title, k.sub) +
+    return '<section class="sec" id="calculadora"><div class="wrap">' + head('Calculadora', k.title, k.sub, true) +
       '<div class="calc"' + rv(2, 'rise') + ' data-fee="' + (def.price || 0) + '"><div class="calc-in">' +
       f('c-fee', 'Honorarios mensuales (MXN)', def.price || 9900, 100, '') + f('c-ads', 'Inversión en anuncios (MXN)', 4000, 100, '') +
       f('c-cpl', 'Costo por mensaje o lead (MXN)', 60, 5, '') + f('c-close', 'De cada 100 mensajes, ¿cuántos compran?', 20, 1, '%') + f('c-ticket', 'Venta promedio por cliente (MXN)', 1500, 50, '') +
@@ -247,7 +274,7 @@
 
   R.proof = function (c) {
     var p = c.proof, tm = p.testimonials.filter(function (t) { return t.text; });
-    return '<section class="sec paper" id="compromisos"><div class="wrap">' + head('Confianza', p.title) +
+    return '<section class="sec paper" id="compromisos"><div class="wrap">' + head('Confianza', p.title, '', true) +
       '<div class="commits">' + p.commitments.map(function (it, i) {
         return '<article class="commit"' + rv(i + 1) + '><span class="seal" aria-hidden="true">' + icon('check') + '</span><div><span class="commit-n">Compromiso ' + pad2(i + 1) + '</span><h3>' + e(it.t) + '</h3><p>' + e(it.d) + '</p></div></article>';
       }).join('') + '</div>' +
@@ -271,7 +298,7 @@
       '<h2' + rv(1, 'words') + '>' + words(k.title) + '</h2><p class="lead"' + rv(2) + '>' + e(k.sub) + '</p>' +
       '<ul class="ticks"' + rv(3) + '><li>' + icon('check') + '<span>Respuesta el mismo día hábil</span></li><li>' + icon('check') + '<span>Sin compromiso</span></li><li>' + icon('check') + '<span>Ideas concretas para tu negocio</span></li></ul>' +
       '<a class="mini-link" href="' + e(S.waLink(b.whatsapp, 'Hola, quiero un diagnóstico para mi negocio.')) + '" target="_blank" rel="noopener" data-track="cta_clicked" data-where="contacto_wa"' + rv(4) + '>O escríbenos directo por WhatsApp</a>' +
-      stamp(String(b.name).toUpperCase() + ' ✦ ' + String(b.city).toUpperCase() + ' ✦ ', 'contact-stamp') + '</div>' +
+      seal(c, 'contact-stamp') + '</div>' +
       '<form class="form" id="lead-form" novalidate autocomplete="on"' + rv(2, 'rise') + '><p class="form-head"><span>Diagnóstico gratis</span><span>Formulario / 01</span></p><div class="hp" aria-hidden="true"><label>Sitio web<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>' +
       '<label class="fld"><span>Tu nombre</span><input name="name" required maxlength="80" autocomplete="name" placeholder="Ana Pérez"></label>' +
       '<label class="fld"><span>Nombre de tu negocio</span><input name="business" required maxlength="100" autocomplete="organization" placeholder="Clínica Sol"></label>' +
@@ -287,8 +314,9 @@
     var k = c.cta, line = e(c.brand.tagline) + ' ' + star() + ' Creatividad sin límites ' + star() + ' ';
     return '<section class="sec final" aria-labelledby="h-final"><div class="manifesto" aria-hidden="true"><div class="manifesto-row" data-scrub="-0.35">' + line + line + line + '</div>' +
       '<div class="manifesto-row alt" data-scrub="0.25">' + line + line + line + '</div></div>' +
-      '<div class="wrap final-in">' + stripes('final-stripes') + '<h2 id="h-final"' + rv(0, 'words') + '>' + words(k.title) + '</h2><p class="lead"' + rv(1) + '>' + e(k.sub) + '</p>' +
-      '<a class="btn btn-primary btn-lg" data-magnet href="' + e(S.waLink(c.brand.whatsapp, 'Hola, quiero platicar sobre marketing para mi negocio.')) + '" target="_blank" rel="noopener" data-track="cta_clicked" data-where="cta_final"' + rv(2) + '><span>' + e(k.button) + '</span>' + icon('wa') + '</a></div></section>';
+      '<div class="wrap final-in"><div class="final-copy">' + stripes('final-stripes') + '<h2 id="h-final"' + rv(0, 'words') + '>' + words(k.title) + '</h2><p class="lead"' + rv(1) + '>' + e(k.sub) + '</p>' +
+      '<a class="btn btn-primary btn-lg" data-magnet href="' + e(S.waLink(c.brand.whatsapp, 'Hola, quiero platicar sobre marketing para mi negocio.')) + '" target="_blank" rel="noopener" data-track="cta_clicked" data-where="cta_final"' + rv(2) + '><span>' + e(k.button) + '</span>' + icon('wa') + '</a></div>' +
+      '<div class="final-tag"' + rv(2, 'rise') + '>' + tagCard(c) + '</div></div></section>';
   };
 
   /* ---------- piezas fijas ---------- */
@@ -308,17 +336,20 @@
 
   function hero(c) {
     var h = c.hero, ex = S.exampleClientData(), t = S.totals(ex);
-    return '<section class="hero" id="inicio" aria-labelledby="h-hero"><div class="hero-bg" aria-hidden="true">' + skyline() + stripes('hero-stripes') + '<div class="hero-glow"></div></div>' +
-      '<div class="hero-meta" aria-hidden="true"><span>Agencia de marketing</span><i></i><span>Tijuana · Baja California</span><i></i><span>Est. 2026</span></div>' +
+    var tw = [[8, 18, 14], [22, 9, 9], [47, 14, 11], [63, 6, 16], [78, 22, 10], [91, 12, 13], [36, 30, 8], [85, 38, 9], [14, 42, 7], [56, 40, 9]].map(function (t, i) {
+      return '<span class="twinkle" style="left:' + t[0] + '%;top:' + t[1] + '%;--s:' + t[2] + 'px;--d:' + (i * 0.37).toFixed(2) + 's">' + star() + '</span>';
+    }).join('');
+    return '<section class="hero" id="inicio" aria-labelledby="h-hero"><div class="hero-bg" aria-hidden="true">' + tw + skyline() + stripes('hero-stripes') + '<div class="hero-glow"></div></div>' +
+      '<div class="hero-meta" aria-hidden="true"><span>' + e(c.brand.tagline) + '</span><i></i><span>Tijuana · Baja California</span><i></i><span>Est. 2026</span></div>' +
       '<div class="hero-in"><div class="hero-copy"><span class="pill" data-reveal style="--i:0">' + star() + e(h.badge) + '</span>' +
       '<h1 id="h-hero" data-reveal="words" style="--i:1">' + words(h.title) + '</h1><p class="lead" data-reveal style="--i:6">' + e(h.sub) + '</p>' +
       '<div class="cta-row" data-reveal style="--i:7"><a class="btn btn-primary btn-lg" data-magnet href="#contacto" data-track="cta_clicked" data-where="hero_diagnostico"><span>' + e(h.cta1) + '</span>' + icon('arrow') + '</a>' +
       '<a class="btn btn-ghost btn-lg" href="#paquetes" data-track="cta_clicked" data-where="hero_paquetes"><span>' + e(h.cta2) + '</span></a></div>' +
       (h.note ? '<p class="fine" data-reveal style="--i:8">' + e(h.note) + '</p>' : '') + '</div>' +
-      '<div class="hero-vis" aria-hidden="true"><div class="hero-mark" data-tilt="18">' + mark('big') + '</div>' +
+      '<div class="hero-vis" aria-hidden="true"><div class="hero-mark" data-tilt="18">' + mark('big') + '</div>' + seal(c, 'hero-seal') +
       '<div class="float f1" data-tilt="-30"><span>Mensajes · ejemplo</span><strong data-count="' + S.num(t.leads) + '">' + S.num(t.leads) + '</strong>' + areaChart(ex.series.map(function (r) { return r.leads; }), 200, 50) + '</div>' +
       '<div class="float f2" data-tilt="24"><span class="dot on"></span><div><b>Campaña activa</b><small>Mensajes de WhatsApp</small></div></div>' +
-      '<div class="float f3" data-tilt="-16"><b>Google · #3</b><small>dentista en tijuana</small></div><span class="hero-tag">Datos de ejemplo</span></div></div>' +
+      '<span class="hero-tag">Datos de ejemplo</span></div></div>' +
       '<a class="scroll-cue" href="#main-start" aria-label="Bajar al contenido"><span>Desliza</span><i></i></a></section>';
   }
 
@@ -332,12 +363,12 @@
     var b = c.brand, yr = new Date().getFullYear();
     var soc = [['instagram', 'Instagram'], ['facebook', 'Facebook'], ['tiktok', 'TikTok']].filter(function (s) { return S.safeUrl(b[s[0]]); });
     return '<footer class="foot"><div class="wrap"><div class="foot-top"><div class="foot-brand"><a class="logo" href="/" aria-label="' + e(b.name) + ', inicio">' + mark() + wordmark(c) + '</a><p>' + e(b.tagline) + '</p>' +
-      stamp(String(b.name).toUpperCase() + ' ✦ TIJUANA ✦ BAJA CALIFORNIA ✦ EST. 2026 ✦ ', 'foot-stamp') + '</div>' +
+      seal(c, 'foot-stamp') + '</div>' +
       '<div class="foot-col"><h4>Contacto</h4><a href="' + e(S.waLink(b.whatsapp)) + '" target="_blank" rel="noopener">WhatsApp ' + e(b.whatsapp) + '</a><a href="mailto:' + e(b.email) + '">' + e(b.email) + '</a><span>' + e(b.city) + '</span>' +
       soc.map(function (s) { return '<a href="' + e(S.safeUrl(b[s[0]])) + '" target="_blank" rel="noopener">' + s[1] + '</a>'; }).join('') + '</div>' +
       '<div class="foot-col"><h4>Sitio</h4>' + NAV.slice(0, 4).map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</div>' +
       '<div class="foot-col"><h4>Cuenta</h4><a href="/auth.html">Entrar</a><a href="/auth.html?mode=register">Crear cuenta</a><a href="/aviso-de-privacidad.html">Aviso de privacidad</a><a href="/terminos.html">Términos</a></div></div>' +
-      '<p class="foot-word" aria-hidden="true" data-reveal="rise">' + e(b.name) + star() + '</p>' +
+      '<div class="foot-word" aria-hidden="true" data-reveal="rise">' + (isLF(c) ? wordmark(c) : e(b.name) + star()) + '</div>' +
       '<p class="copy"><span>© ' + yr + ' ' + e(b.name) + '</span><span>' + e(b.domain) + '</span><span>Hecho en Tijuana</span></p></div></footer>' +
       '<a class="wa-fab" href="' + e(S.waLink(b.whatsapp, 'Hola, vengo de la página de Línea Frontera.')) + '" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp" data-track="cta_clicked" data-where="fab">' + icon('wa') + '<span>WhatsApp</span></a>';
   }
